@@ -10,15 +10,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Chart.js Matrix/Heatmap Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@^1.1/dist/chartjs-chart-matrix.min.js"></script>
-    <!-- Leaflet.js for Maps -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Define a modern, clean color palette */
+        /* --- GLASSMORPHISM REDESIGN --- */
+
         :root {
             --color-primary: #4f46e5; /* Indigo */
             --color-secondary: #ec4899; /* Pink */
@@ -26,25 +24,36 @@
             --color-warning: #f59e0b;  /* Amber */
             --color-danger: #ef4444;   /* Red */
             --color-info: #3b82f6;    /* Blue */
-            --color-light-gray: #f9fafb;
-            --color-medium-gray: #e5e7eb;
-            --color-dark-gray: #4b5563;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--color-light-gray);
+            /* New vibrant gradient background */
+            background-image: linear-gradient(to right top, #0c0a3e, #4a2f6c, #8d5395, #d27cbc, #ffacdb);
+            color: #f9fafb; /* Default text color to light */
+        }
+
+        /* Base class for all glass elements */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px); /* For Safari */
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border-radius: 1rem; /* 16px */
         }
 
         .kpi-card {
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            border: 1px solid var(--color-medium-gray);
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border-radius: 1rem;
             display: flex;
             align-items: center;
             gap: 1rem;
+            padding: 1.5rem;
         }
 
         .kpi-icon {
@@ -53,44 +62,44 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         .chart-container {
-            background-color: white;
             padding: 1.5rem;
-            border-radius: 0.75rem;
-            border: 1px solid var(--color-medium-gray);
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
             height: 400px;
         }
         
-        /* Style for the map container div */
-        #churnMap {
-            height: 100%;
+        .map-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            border-radius: 0.5rem;
+            height: 100%;
+            border: none;
+            border-radius: 1rem; /* Match the card's border radius */
         }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="text-gray-100">
 
     <div class="flex h-screen">
-        <!-- Static Sidebar -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+        <!-- Static Sidebar with Glass Effect -->
+        <aside class="w-64 glass-effect flex-shrink-0 !rounded-none !border-r !border-l-0 !border-t-0 !border-b-0">
             <div class="p-6">
                 <div class="flex items-center gap-3">
-                     <svg class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
-                    <span class="text-2xl font-bold">Churn AI</span>
+                    <span class="text-2xl font-bold text-white">Churn AI</span>
                 </div>
             </div>
             <nav class="mt-8 px-4">
-                <a href="#" class="flex items-center gap-3 px-4 py-3 bg-indigo-50 text-indigo-700 rounded-lg font-semibold">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 bg-white/10 text-white rounded-lg font-semibold">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                     <span>Dashboard</span>
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 mt-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 mt-2 text-gray-300 hover:bg-white/5 rounded-lg">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     <span>Prediction</span>
                 </a>
@@ -102,65 +111,69 @@
             <div class="max-w-7xl mx-auto">
                 <!-- Header -->
                 <header class="mb-8">
-                    <h1 class="text-3xl font-bold">Dashboard</h1>
+                    <h1 class="text-3xl font-bold text-white">Customer Churn Dashboard</h1>
+                    <p class="text-gray-300 mt-1">An aggregate view of the auto insurance customer dataset.</p>
                 </header>
 
                 <!-- KPI Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="kpi-card">
-                        <div class="kpi-icon bg-blue-100 text-blue-600">
+                        <div class="kpi-icon text-blue-300">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Total Customers</p>
-                            <p class="text-2xl font-bold">{{ total_customers }}</p>
+                            <p class="text-sm text-gray-300">Total Customers</p>
+                            <p class="text-2xl font-bold text-white">{{ total_customers }}</p>
                         </div>
                     </div>
                      <div class="kpi-card">
-                        <div class="kpi-icon bg-red-100 text-red-600">
+                        <div class="kpi-icon text-red-300">
                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Churned Customers</p>
-                            <p class="text-2xl font-bold">{{ churned_customers }}</p>
+                            <p class="text-sm text-gray-300">Churned Customers</p>
+                            <p class="text-2xl font-bold text-white">{{ churned_customers }}</p>
                         </div>
                     </div>
                      <div class="kpi-card">
-                        <div class="kpi-icon bg-amber-100 text-amber-600">
+                        <div class="kpi-icon text-amber-300">
                              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Overall Churn Rate</p>
-                            <p class="text-2xl font-bold">{{ churn_rate }}%</p>
+                            <p class="text-sm text-gray-300">Overall Churn Rate</p>
+                            <p class="text-2xl font-bold text-white">{{ churn_rate }}%</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Charts Section -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="chart-container pb-16"><h2 class="text-lg font-semibold text-center mb-2">Customer Overview</h2><canvas id="churnOverviewChart"></canvas></div>
-                    <div class="chart-container pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn by Credit Status</h2><canvas id="churnByCreditPieChart"></canvas></div>
-                    <div class="chart-container pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn by Marital Status</h2><canvas id="churnByMaritalPieChart"></canvas></div>
-                    <div class="chart-container pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn by Home Ownership</h2><canvas id="churnByOwnerPieChart"></canvas></div>
-                    <div class="chart-container pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn Rate by Tenure</h2><canvas id="churnByTenureChart"></canvas></div>
-                    <div class="chart-container pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn Rate by Premium</h2><canvas id="churnByPremiumChart"></canvas></div>
-                    <div class="chart-container pb-16 lg:col-span-2"><h2 class="text-lg font-semibold text-center mb-2">Churn Rate by Income</h2><canvas id="churnByIncomeChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2">Customer Overview</h2><canvas id="churnOverviewChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn by Credit Status</h2><canvas id="churnByCreditPieChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn by Marital Status</h2><canvas id="churnByMaritalPieChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn by Home Ownership</h2><canvas id="churnByOwnerPieChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn Rate by Tenure</h2><canvas id="churnByTenureChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn Rate by Premium</h2><canvas id="churnByPremiumChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16 lg:col-span-2"><h2 class="text-lg font-semibold text-center mb-2">Churn Rate by Income</h2><canvas id="churnByIncomeChart"></canvas></div>
                     
-                    <!-- Geospatial Map Container -->
-                    <div class="chart-container h-[720px] lg:col-span-2 flex flex-col">
+                    <div class="chart-container glass-effect h-[720px] lg:col-span-2 flex flex-col">
                         <h2 class="text-lg font-semibold text-center mb-4 flex-shrink-0">Geospatial Churn Hotspots</h2>
-                        <!-- This wrapper will correctly position the iframe -->
                         <div class="map-container flex-grow relative">
                             {{ churn_map_html | safe }}
                         </div>
                     </div>
+
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        // --- NEW MODERN COLOR PALETTE ---
+        // --- Set Chart.js defaults for the new theme ---
+        Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.2)';
+
+        // Color palette (re-using from previous version)
         const colorPalette = {
             primary: 'rgba(79, 70, 229, 0.8)',
             secondary: 'rgba(236, 72, 153, 0.8)',
@@ -168,126 +181,90 @@
             warning: 'rgba(245, 158, 11, 0.8)',
             danger: 'rgba(239, 68, 68, 0.8)',
             info: 'rgba(59, 130, 246, 0.8)',
-            pie: ['rgba(59, 130, 246, 0.8)', 'rgba(236, 72, 153, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(16, 185, 129, 0.8)']
+            pie: ['rgba(59, 130, 246, 0.9)', 'rgba(236, 72, 153, 0.9)', 'rgba(245, 158, 11, 0.9)', 'rgba(139, 92, 246, 0.9)', 'rgba(16, 185, 129, 0.9)']
         };
         
-        // --- CHART HELPERS ---
-        const getBarChartOptions = () => ({
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { callback: (v) => v + '%' } } }
-        });
+        const getBarChartOptions = (axis = 'x') => {
+            const options = {
+                indexAxis: axis, responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } }, scales: {}
+            };
+            if (axis === 'y') {
+                options.scales.x = { beginAtZero: true, ticks: { callback: (v) => v.toFixed(1) + '%' } };
+                options.scales.y = { grid: { display: false } };
+            } else {
+                options.scales.y = { beginAtZero: true, ticks: { callback: (v) => v.toFixed(1) + '%' } };
+                options.scales.x = { grid: { display: false } };
+            }
+            return options;
+        };
+
         const getPieChartOptions = () => ({
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom' } }
+            plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255, 255, 255, 0.9)' } } }
         });
 
-        // --- CHART INITIALIZATION (Existing Charts) ---
-        
-        // 1. Overview
+        // --- CHART INITIALIZATION ---
         const churnOverviewData = JSON.parse('{{ churn_overview_data | safe }}');
         new Chart(document.getElementById('churnOverviewChart'), {
             type: 'doughnut',
-            data: {
-                labels: churnOverviewData.labels,
-                datasets: [{ data: churnOverviewData.data, backgroundColor: [colorPalette.success, colorPalette.danger] }]
-            },
+            data: { labels: churnOverviewData.labels, datasets: [{ data: churnOverviewData.data, backgroundColor: [colorPalette.success, colorPalette.danger], borderWidth: 0 }] },
             options: getPieChartOptions()
         });
 
-        // 2. Churn by Credit
         const churnByCreditPieData = JSON.parse('{{ churn_by_credit_pie_data | safe }}');
         new Chart(document.getElementById('churnByCreditPieChart'), {
             type: 'pie',
-            data: {
-                labels: churnByCreditPieData.labels,
-                datasets: [{ data: churnByCreditPieData.data, backgroundColor: [colorPalette.pie[0], colorPalette.pie[1]] }]
-            },
+            data: { labels: churnByCreditPieData.labels, datasets: [{ data: churnByCreditPieData.data, backgroundColor: [colorPalette.pie[0], colorPalette.pie[1]], borderWidth: 0 }] },
             options: getPieChartOptions()
         });
 
-        // 3. Churn by Marital Status
         const churnByMaritalPieData = JSON.parse('{{ churn_by_marital_pie_data | safe }}');
         new Chart(document.getElementById('churnByMaritalPieChart'), {
             type: 'pie',
-            data: {
-                labels: churnByMaritalPieData.labels,
-                datasets: [{ data: churnByMaritalPieData.data, backgroundColor: colorPalette.pie }]
-            },
+            data: { labels: churnByMaritalPieData.labels, datasets: [{ data: churnByMaritalPieData.data, backgroundColor: colorPalette.pie, borderWidth: 0 }] },
             options: getPieChartOptions()
         });
 
-        // 4. Churn by Home Ownership
         const churnByOwnerPieData = JSON.parse('{{ churn_by_owner_pie_data | safe }}');
         new Chart(document.getElementById('churnByOwnerPieChart'), {
             type: 'pie',
-            data: {
-                labels: churnByOwnerPieData.labels,
-                datasets: [{ data: churnByOwnerPieData.data, backgroundColor: colorPalette.pie }]
-            },
+            data: { labels: churnByOwnerPieData.labels, datasets: [{ data: churnByOwnerPieData.data, backgroundColor: colorPalette.pie, borderWidth: 0 }] },
             options: getPieChartOptions()
         });
 
-        // 5. Churn by Tenure
         const churnByTenureData = JSON.parse('{{ churn_by_tenure_data | safe }}');
         new Chart(document.getElementById('churnByTenureChart'), {
-            type: 'bar',
-            data: {
-                labels: churnByTenureData.labels,
-                datasets: [{ data: churnByTenureData.churn_rate, backgroundColor: colorPalette.success }]
-            },
-            options: getBarChartOptions()
+            type: 'line',
+            data: { labels: churnByTenureData.labels, datasets: [{ data: churnByTenureData.churn_rate, borderColor: colorPalette.primary, backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => v + '%' } } } }
         });
 
-        // 6. Churn by Premium
         const churnByPremiumData = JSON.parse('{{ churn_by_premium_data | safe }}');
         new Chart(document.getElementById('churnByPremiumChart'), {
             type: 'bar',
-            data: {
-                labels: churnByPremiumData.labels,
-                datasets: [{ data: churnByPremiumData.churn_rate, backgroundColor: colorPalette.warning }]
-            },
-            options: getBarChartOptions()
+            data: { labels: churnByPremiumData.labels, datasets: [{ data: churnByPremiumData.churn_rate, backgroundColor: colorPalette.warning }] },
+            options: getBarChartOptions('y')
         });
 
-        // 7. Churn by Income
         const churnByIncomeData = JSON.parse('{{ churn_by_income_data | safe }}');
         new Chart(document.getElementById('churnByIncomeChart'), {
             type: 'bar',
-            data: {
-                labels: churnByIncomeData.labels,
-                datasets: [{ data: churnByIncomeData.churn_rate, backgroundColor: colorPalette.secondary }]
-            },
-            options: getBarChartOptions()
+            data: { labels: churnByIncomeData.labels, datasets: [{ data: churnByIncomeData.churn_rate, backgroundColor: colorPalette.secondary, barThickness: 20, borderRadius: 4 }] },
+            options: getBarChartOptions('x')
         });
         
-        // 8. Correlation Heatmap
         const heatmapData = JSON.parse('{{ heatmap_data | safe }}');
         const heatmapLabels = JSON.parse('{{ heatmap_labels | safe }}');
         new Chart(document.getElementById('correlationHeatmap'), {
             type: 'matrix',
             data: {
                 labels: heatmapLabels,
-                datasets: [{
-                    data: heatmapData,
-                    backgroundColor(ctx) {
-                        const value = ctx.dataset.data[ctx.dataIndex].v;
-                        const alpha = Math.abs(value);
-                        return value < 0 ? `rgba(239, 68, 68, ${alpha})` : `rgba(16, 185, 129, ${alpha})`;
-                    },
-                    width: ({chart}) => (chart.chartArea.width / heatmapLabels.length) - 1,
-                    height: ({chart}) => (chart.chartArea.height / heatmapLabels.length) - 1
-                }]
+                datasets: [{ data: heatmapData, backgroundColor(ctx) { const v = ctx.dataset.data[ctx.dataIndex].v; const a = Math.abs(v); return v < 0 ? `rgba(239, 68, 68, ${a})` : `rgba(16, 185, 129, ${a})`; }, width: ({chart}) => (chart.chartArea.width / heatmapLabels.length) - 1, height: ({chart}) => (chart.chartArea.height / heatmapLabels.length) - 1 }]
             },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { type: 'category', labels: heatmapLabels, grid: { display: false } },
-                    y: { type: 'category', labels: heatmapLabels, offset: true, grid: { display: false } }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { type: 'category', labels: heatmapLabels, grid: { display: false } }, y: { type: 'category', labels: heatmapLabels, offset: true, grid: { display: false } } } }
         });
     </script>
 </body>
 </html>
+

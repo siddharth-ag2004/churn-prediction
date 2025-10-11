@@ -48,8 +48,11 @@ def load_and_prepare_data():
 
 def generate_churn_heatmap(df, sample_size=5000):
     """
-    Generates a folium HeatMap showing churned vs retained customers.
-    Returns the HTML representation of the map.
+    Generates a folium map with layer toggles:
+    - Retained Customers (default visible)
+    - Churned Customers (default visible)
+    - High-Value Customers (default hidden)
+    Returns HTML for embedding in Flask.
     """
     # Drop rows without lat/lon
     df = df.dropna(subset=['LATITUDE', 'LONGITUDE'])
@@ -58,31 +61,53 @@ def generate_churn_heatmap(df, sample_size=5000):
  
     df_stayed = df[df['CHURN'] == 0]
     df_left = df[df['CHURN'] == 1]
+    df_high_value = df[df['CURR_ANN_AMT'] >= df['CURR_ANN_AMT'].quantile(0.9)]  # top 10% premium
  
-    # Base map — zoomed in more
+    # Base map
     m = folium.Map(
         location=[df['LATITUDE'].mean(), df['LONGITUDE'].mean()],
         zoom_start=10,
         tiles='OpenStreetMap'
     )
  
-    # HeatMap for customers who stayed
+    # --- Feature Groups ---
+    # Retained and Churned layers will be added directly to map so they show by default
+    fg_stayed = folium.FeatureGroup(name='Retained Customers', show=True)
+    fg_left = folium.FeatureGroup(name='Churned Customers', show=True)
+    fg_high = folium.FeatureGroup(name='High-Value Customers', show=False)
+ 
+    # HeatMaps
     HeatMap(
         df_stayed[['LATITUDE', 'LONGITUDE']],
         radius=8,
         blur=12,
         gradient={0.2: 'green', 0.8: 'lime'},
         min_opacity=0.5
-    ).add_to(m)
+    ).add_to(fg_stayed)
  
-    # HeatMap for customers who left
     HeatMap(
         df_left[['LATITUDE', 'LONGITUDE']],
         radius=8,
         blur=10,
         gradient={0.2: 'yellow', 0.8: 'red'},
         min_opacity=0.5
-    ).add_to(m)
+    ).add_to(fg_left)
+ 
+    HeatMap(
+        df_high_value[['LATITUDE', 'LONGITUDE']],
+        radius=3,
+        blur=8,
+        gradient={0.2: 'blue', 0.8: 'cyan'},
+        min_opacity=0.6
+    ).add_to(fg_high)
+ 
+    # Add layers to map
+    fg_stayed.add_to(m)
+    fg_left.add_to(m)
+    fg_high.add_to(m)
+ 
+    # Layer Control — collapsed for a cleaner UI
+    folium.LayerControl(collapsed=True, position='topright').add_to(m)
  
     return m._repr_html_()
 # Load the data once when the app starts
