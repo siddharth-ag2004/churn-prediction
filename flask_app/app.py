@@ -209,7 +209,7 @@ def index():
     # 8. Pie Chart for Churn Distribution by Home Ownership
     owner_churn_counts = churned_df.groupby('HOME_OWNER').size()
     churn_by_owner_pie_data = {
-        'labels': owner_churn_counts.index.tolist(),
+        'labels': ['Renter', 'Owner'],
         'data': owner_churn_counts.values.tolist()
     }
 

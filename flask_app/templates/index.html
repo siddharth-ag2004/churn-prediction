@@ -8,22 +8,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js for visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chart.js Matrix/Heatmap Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@^1.1/dist/chartjs-chart-matrix.min.js"></script>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* --- LIGHT GLASSMORPHISM REDESIGN --- */
-
         :root {
-            --color-primary: #4f46e5; /* Indigo */
-            --color-secondary: #ec4899; /* Pink */
-            --color-success: #10b981;  /* Emerald */
-            --color-warning: #f59e0b;  /* Amber */
-            --color-danger: #ef4444;   /* Red */
-            --color-info: #3b82f6;    /* Blue */
+            --color-primary: #4f46e5;
+            --color-secondary: #ec4899;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --color-info: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
@@ -34,27 +36,26 @@
             min-height: 100vh;
         }
 
-        /* Base class for all glass elements */
         .glass-effect {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.45);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
             border-radius: 1rem;
         }
 
         .kpi-card {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
             border-radius: 1rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1.5rem;
+            gap: 1.25rem;
+            padding: 1.75rem 2rem;
         }
 
         .kpi-icon {
@@ -64,21 +65,24 @@
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(236, 72, 153, 0.15));
+            flex-shrink: 0;
         }
 
-        .chart-container {
-            padding: 1.5rem;
-            height: 400px;
+        .kpi-content {
+            display: flex;
+            flex-direction: column;
         }
-        
-        .map-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            border-radius: 1rem;
+
+        .kpi-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1e293b;
         }
 
         .sidebar-nav a {
@@ -96,12 +100,175 @@
             background: rgba(79, 70, 229, 0.15);
             border-left: 3px solid #4f46e5;
         }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 0.7fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+            border-radius: 1rem;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-card.large {
+            min-height: 420px;
+        }
+
+        .chart-card.medium {
+            min-height: 300px;
+        }
+
+        .chart-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1.25rem;
+        }
+
+        .chart-container {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .right-column .chart-card {
+            min-height: 200px;
+        }
+
+        .demographic-section {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .demographic-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+        }
+
+        .pie-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .small-pie-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .small-pie-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .small-pie-canvas {
+            width: 100%;
+            height: 180px;
+            flex-shrink: 0;
+        }
+
+        .map-section {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            min-height: 550px;
+        }
+
+        .map-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+        }
+
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 450px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .map-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pie-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                gap: 1rem;
+            }
+
+            .pie-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-card {
+                padding: 1.25rem 1.5rem;
+                gap: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="flex h-screen">
-        <!-- Static Sidebar with Glass Effect -->
+        <!-- Static Sidebar -->
         <aside class="w-64 glass-effect flex-shrink-0 !rounded-none !border-r !border-l-0 !border-t-0 !border-b-0 overflow-y-auto">
             <div class="p-6">
                 <div class="flex items-center gap-3">
@@ -125,61 +292,113 @@
 
         <!-- Main Content -->
         <main class="flex-1 overflow-y-auto p-8">
-            <div class="max-w-7xl mx-auto">
+            <div class="w-full">
                 <!-- Header -->
                 <header class="mb-8">
                     <h1 class="text-4xl font-bold text-gray-800">Customer Churn Dashboard</h1>
-                    <p class="text-gray-600 mt-2">An aggregate view of the auto insurance customer dataset.</p>
+                    <p class="text-gray-600 mt-2">Interactive analysis of customer churn patterns and trends.</p>
                 </header>
 
-                <!-- KPI Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- KPI Cards Top Bar -->
+                <div class="grid grid-cols-3 gap-6 mb-8">
                     <div class="kpi-card">
                         <div class="kpi-icon text-blue-500">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Total Customers</p>
-                            <p class="text-2xl font-bold text-gray-800">{{ total_customers }}</p>
+                        <div class="kpi-content">
+                            <span class="kpi-label">Total Customers</span>
+                            <span class="kpi-value">{{ total_customers }}</span>
                         </div>
                     </div>
-                     <div class="kpi-card">
+
+                    <div class="kpi-card">
                         <div class="kpi-icon text-red-400">
                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Churned Customers</p>
-                            <p class="text-2xl font-bold text-gray-800">{{ churned_customers }}</p>
+                        <div class="kpi-content">
+                            <span class="kpi-label">Churned Customers</span>
+                            <span class="kpi-value">{{ churned_customers }}</span>
                         </div>
                     </div>
-                     <div class="kpi-card">
+
+                    <div class="kpi-card">
                         <div class="kpi-icon text-amber-400">
                              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Overall Churn Rate</p>
-                            <p class="text-2xl font-bold text-gray-800">{{ churn_rate }}%</p>
+                        <div class="kpi-content">
+                            <span class="kpi-label">Overall Churn Rate</span>
+                            <span class="kpi-value">{{ churn_rate }}%</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Charts Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Customer Overview</h2><canvas id="churnOverviewChart"></canvas></div>
-                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Churn by Credit Status</h2><canvas id="churnByCreditPieChart"></canvas></div>
-                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Churn by Marital Status</h2><canvas id="churnByMaritalPieChart"></canvas></div>
-                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Churn by Home Ownership</h2><canvas id="churnByOwnerPieChart"></canvas></div>
-                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Churn Rate by Tenure</h2><canvas id="churnByTenureChart"></canvas></div>
-                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Churn Rate by Premium</h2><canvas id="churnByPremiumChart"></canvas></div>
-                    <div class="chart-container glass-effect pb-16 lg:col-span-2"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Churn Rate by Income</h2><canvas id="churnByIncomeChart"></canvas></div>
-                    
-                    <div class="chart-container glass-effect h-[720px] lg:col-span-2 flex flex-col">
-                        <h2 class="text-lg font-semibold text-center mb-4 flex-shrink-0 text-gray-800">Geospatial Churn Hotspots</h2>
-                        <div class="map-container flex-grow relative">
-                            {{ churn_map_html | safe }}
+                <!-- Main Grid: Customer Overview Left + Premium/Income Right -->
+                <div class="grid grid-cols-3 gap-6">
+                    <!-- Left: Smaller Customer Overview -->
+                    <div class="chart-card" style="min-height: 320px;">
+                        <div class="chart-title">Customer Overview</div>
+                        <div class="chart-container">
+                            <canvas id="churnOverviewChart"></canvas>
                         </div>
                     </div>
 
+                    <!-- Middle: Churn by Tenure Below Overview -->
+                    <div class="chart-card" style="min-height: 320px;">
+                        <div class="chart-title">Churn Rate by Tenure</div>
+                        <div class="chart-container">
+                            <canvas id="churnByTenureChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Stacked Premium and Income -->
+                    <div class="flex flex-col gap-6">
+                        <div class="chart-card medium">
+                            <div class="chart-title">Churn Rate by Premium</div>
+                            <div class="chart-container">
+                                <canvas id="churnByPremiumChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card medium">
+                            <div class="chart-title">Churn Rate by Income</div>
+                            <div class="chart-container">
+                                <canvas id="churnByIncomeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demographic Section -->
+                <div class="demographic-section">
+                    <h2 class="demographic-title">Demographic Breakdown</h2>
+                    <div class="pie-grid">
+                        <div class="small-pie-card">
+                            <div class="small-pie-title">By Credit Status</div>
+                            <div class="small-pie-canvas">
+                                <canvas id="churnByCreditPieChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="small-pie-card">
+                            <div class="small-pie-title">By Marital Status</div>
+                            <div class="small-pie-canvas">
+                                <canvas id="churnByMaritalPieChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="small-pie-card">
+                            <div class="small-pie-title">By Home Ownership</div>
+                            <div class="small-pie-canvas">
+                                <canvas id="churnByOwnerPieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Section -->
+                <div class="map-section">
+                    <h2 class="map-title">Geospatial Churn Hotspots</h2>
+                    <div class="map-container">
+                        {{ churn_map_html | safe }}
+                    </div>
                 </div>
             </div>
         </main>
@@ -218,7 +437,13 @@
 
         const getPieChartOptions = () => ({
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { color: 'rgba(51, 65, 85, 0.9)' } } }
+            plugins: { legend: { position: 'bottom', labels: { color: 'rgba(51, 65, 85, 0.9)', font: { size: 11 } } } }
+        });
+
+        const getLineChartOptions = () => ({
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { callback: (v) => v + '%' } } }
         });
 
         // --- CHART INITIALIZATION ---
@@ -254,7 +479,7 @@
         new Chart(document.getElementById('churnByTenureChart'), {
             type: 'line',
             data: { labels: churnByTenureData.labels, datasets: [{ data: churnByTenureData.churn_rate, borderColor: colorPalette.primary, backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => v + '%' } } } }
+            options: getLineChartOptions()
         });
 
         const churnByPremiumData = JSON.parse('{{ churn_by_premium_data | safe }}');
@@ -269,17 +494,6 @@
             type: 'bar',
             data: { labels: churnByIncomeData.labels, datasets: [{ data: churnByIncomeData.churn_rate, backgroundColor: colorPalette.secondary, barThickness: 20, borderRadius: 4 }] },
             options: getBarChartOptions('x')
-        });
-        
-        const heatmapData = JSON.parse('{{ heatmap_data | safe }}');
-        const heatmapLabels = JSON.parse('{{ heatmap_labels | safe }}');
-        new Chart(document.getElementById('correlationHeatmap'), {
-            type: 'matrix',
-            data: {
-                labels: heatmapLabels,
-                datasets: [{ data: heatmapData, backgroundColor(ctx) { const v = ctx.dataset.data[ctx.dataIndex].v; const a = Math.abs(v); return v < 0 ? `rgba(239, 68, 68, ${a})` : `rgba(16, 185, 129, ${a})`; }, width: ({chart}) => (chart.chartArea.width / heatmapLabels.length) - 1, height: ({chart}) => (chart.chartArea.height / heatmapLabels.length) - 1 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { type: 'category', labels: heatmapLabels, grid: { display: false } }, y: { type: 'category', labels: heatmapLabels, offset: true, grid: { display: false } } } }
         });
     </script>
 </body>
