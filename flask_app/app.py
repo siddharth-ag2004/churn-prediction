@@ -1,9 +1,10 @@
 import pandas as pd
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import json
 import numpy as np
 import folium
 from folium.plugins import HeatMap
+import random
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -113,6 +114,30 @@ def generate_churn_heatmap(df, sample_size=5000):
 # Load the data once when the app starts
 df = load_and_prepare_data()
 
+def predict_churn_probability(customer_data):
+    """Simulates a model prediction."""
+    # A simple simulation: higher premium and lower tenure increase churn risk
+    base_risk = 0.1
+    risk_from_premium = (customer_data['CURR_ANN_AMT'] / 2000) * 0.3
+    risk_from_tenure = ((3650 - customer_data['DAYS_TENURE']) / 3650) * 0.3
+    risk_from_credit = 0 if customer_data['GOOD_CREDIT'] else 0.1
+    
+    total_risk = base_risk + risk_from_premium + risk_from_tenure + risk_from_credit
+    return min(random.uniform(total_risk - 0.05, total_risk + 0.05), 0.95)
+
+def get_shap_explanation(customer_data):
+    """Simulates a SHAP explanation for a prediction."""
+    # These values represent the positive (red) or negative (green) impact on churn risk
+    explanation = [
+        {"feature": "Tenure", "value": -random.uniform(0.1, 0.3)},
+        {"feature": "Annual Premium", "value": random.uniform(0.05, 0.25)},
+        {"feature": "Income", "value": -random.uniform(0.05, 0.15)},
+        {"feature": "Good Credit", "value": -random.uniform(0.05, 0.1) if customer_data['GOOD_CREDIT'] else random.uniform(0.05, 0.1)},
+        {"feature": "Age", "value": -random.uniform(0.01, 0.05)}
+    ]
+    random.shuffle(explanation)
+    return {"base_value": 0.15, "explanation": explanation}
+
 @app.route('/')
 def index():
     """
@@ -206,6 +231,31 @@ def index():
         churn_by_owner_pie_data=json.dumps(churn_by_owner_pie_data),
         churn_map_html=churn_map_html  # <-- pass Folium map HTML
     )
+    
+@app.route('/predict', methods=['GET', 'POST'])
+def predict():
+    """Handles the individual customer prediction page."""
+    prediction_data = None
+    if request.method == 'POST':
+        # 1. Get data from the form
+        customer_data = {
+            'CURR_ANN_AMT': float(request.form['annual_premium']),
+            'DAYS_TENURE': int(request.form['tenure']),
+            'INCOME': float(request.form['income']),
+            'AGE_IN_YEARS': int(request.form['age']),
+            'GOOD_CREDIT': request.form.get('good_credit') == 'on'
+        }
+        
+        # 2. Get simulated prediction and explanation
+        probability = predict_churn_probability(customer_data)
+        explanation = get_shap_explanation(customer_data)
+        
+        prediction_data = {
+            "probability": probability,
+            "explanation": explanation
+        }
+
+    return render_template('prediction.html', prediction_data=prediction_data)
 
 if __name__ == '__main__':
     app.run(debug=True)

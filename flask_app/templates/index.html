@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* --- GLASSMORPHISM REDESIGN --- */
+        /* --- LIGHT GLASSMORPHISM REDESIGN --- */
 
         :root {
             --color-primary: #4f46e5; /* Indigo */
@@ -28,26 +28,27 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            /* New vibrant gradient background */
-            background-image: linear-gradient(to right top, #0c0a3e, #4a2f6c, #8d5395, #d27cbc, #ffacdb);
-            color: #f9fafb; /* Default text color to light */
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #c7ceea 100%);
+            background-attachment: fixed;
+            color: #334155;
+            min-height: 100vh;
         }
 
         /* Base class for all glass elements */
         .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px); /* For Safari */
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-            border-radius: 1rem; /* 16px */
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            border-radius: 1rem;
         }
 
         .kpi-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
             border-radius: 1rem;
             display: flex;
@@ -62,7 +63,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(236, 72, 153, 0.15));
         }
 
         .chart-container {
@@ -77,29 +78,45 @@
             width: 100%;
             height: 100%;
             border: none;
-            border-radius: 1rem; /* Match the card's border radius */
+            border-radius: 1rem;
+        }
+
+        .sidebar-nav a {
+            color: #475569;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        .sidebar-nav a.active {
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.15);
+            border-left: 3px solid #4f46e5;
         }
     </style>
 </head>
-<body class="text-gray-100">
+<body>
 
     <div class="flex h-screen">
         <!-- Static Sidebar with Glass Effect -->
-        <aside class="w-64 glass-effect flex-shrink-0 !rounded-none !border-r !border-l-0 !border-t-0 !border-b-0">
+        <aside class="w-64 glass-effect flex-shrink-0 !rounded-none !border-r !border-l-0 !border-t-0 !border-b-0 overflow-y-auto">
             <div class="p-6">
                 <div class="flex items-center gap-3">
-                     <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <svg class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
-                    <span class="text-2xl font-bold text-white">Churn AI</span>
+                    <span class="text-2xl font-bold text-gray-800">Churn AI</span>
                 </div>
             </div>
-            <nav class="mt-8 px-4">
-                <a href="#" class="flex items-center gap-3 px-4 py-3 bg-white/10 text-white rounded-lg font-semibold">
+            <nav class="mt-8 px-4 sidebar-nav">
+                <a href="{{ url_for('index') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'index' %}active{% endif %}">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                     <span>Dashboard</span>
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 mt-2 text-gray-300 hover:bg-white/5 rounded-lg">
+                <a href="{{ url_for('predict') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'predict' %}active{% endif %}">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     <span>Prediction</span>
                 </a>
@@ -111,53 +128,53 @@
             <div class="max-w-7xl mx-auto">
                 <!-- Header -->
                 <header class="mb-8">
-                    <h1 class="text-3xl font-bold text-white">Customer Churn Dashboard</h1>
-                    <p class="text-gray-300 mt-1">An aggregate view of the auto insurance customer dataset.</p>
+                    <h1 class="text-4xl font-bold text-gray-800">Customer Churn Dashboard</h1>
+                    <p class="text-gray-600 mt-2">An aggregate view of the auto insurance customer dataset.</p>
                 </header>
 
                 <!-- KPI Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="kpi-card">
-                        <div class="kpi-icon text-blue-300">
+                        <div class="kpi-icon text-blue-500">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-300">Total Customers</p>
-                            <p class="text-2xl font-bold text-white">{{ total_customers }}</p>
+                            <p class="text-sm text-gray-600">Total Customers</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ total_customers }}</p>
                         </div>
                     </div>
                      <div class="kpi-card">
-                        <div class="kpi-icon text-red-300">
+                        <div class="kpi-icon text-red-400">
                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-300">Churned Customers</p>
-                            <p class="text-2xl font-bold text-white">{{ churned_customers }}</p>
+                            <p class="text-sm text-gray-600">Churned Customers</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ churned_customers }}</p>
                         </div>
                     </div>
                      <div class="kpi-card">
-                        <div class="kpi-icon text-amber-300">
+                        <div class="kpi-icon text-amber-400">
                              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-300">Overall Churn Rate</p>
-                            <p class="text-2xl font-bold text-white">{{ churn_rate }}%</p>
+                            <p class="text-sm text-gray-600">Overall Churn Rate</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ churn_rate }}%</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Charts Section -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2">Customer Overview</h2><canvas id="churnOverviewChart"></canvas></div>
-                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn by Credit Status</h2><canvas id="churnByCreditPieChart"></canvas></div>
-                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn by Marital Status</h2><canvas id="churnByMaritalPieChart"></canvas></div>
-                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn by Home Ownership</h2><canvas id="churnByOwnerPieChart"></canvas></div>
-                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn Rate by Tenure</h2><canvas id="churnByTenureChart"></canvas></div>
-                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2">Churn Rate by Premium</h2><canvas id="churnByPremiumChart"></canvas></div>
-                    <div class="chart-container glass-effect pb-16 lg:col-span-2"><h2 class="text-lg font-semibold text-center mb-2">Churn Rate by Income</h2><canvas id="churnByIncomeChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Customer Overview</h2><canvas id="churnOverviewChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Churn by Credit Status</h2><canvas id="churnByCreditPieChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Churn by Marital Status</h2><canvas id="churnByMaritalPieChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Churn by Home Ownership</h2><canvas id="churnByOwnerPieChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Churn Rate by Tenure</h2><canvas id="churnByTenureChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Churn Rate by Premium</h2><canvas id="churnByPremiumChart"></canvas></div>
+                    <div class="chart-container glass-effect pb-16 lg:col-span-2"><h2 class="text-lg font-semibold text-center mb-2 text-gray-800">Churn Rate by Income</h2><canvas id="churnByIncomeChart"></canvas></div>
                     
                     <div class="chart-container glass-effect h-[720px] lg:col-span-2 flex flex-col">
-                        <h2 class="text-lg font-semibold text-center mb-4 flex-shrink-0">Geospatial Churn Hotspots</h2>
+                        <h2 class="text-lg font-semibold text-center mb-4 flex-shrink-0 text-gray-800">Geospatial Churn Hotspots</h2>
                         <div class="map-container flex-grow relative">
                             {{ churn_map_html | safe }}
                         </div>
@@ -170,10 +187,10 @@
 
     <script>
         // --- Set Chart.js defaults for the new theme ---
-        Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
-        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.2)';
+        Chart.defaults.color = 'rgba(51, 65, 85, 0.7)';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.3)';
 
-        // Color palette (re-using from previous version)
+        // Color palette
         const colorPalette = {
             primary: 'rgba(79, 70, 229, 0.8)',
             secondary: 'rgba(236, 72, 153, 0.8)',
@@ -201,7 +218,7 @@
 
         const getPieChartOptions = () => ({
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255, 255, 255, 0.9)' } } }
+            plugins: { legend: { position: 'bottom', labels: { color: 'rgba(51, 65, 85, 0.9)' } } }
         });
 
         // --- CHART INITIALIZATION ---
@@ -267,4 +284,3 @@
     </script>
 </body>
 </html>
-
