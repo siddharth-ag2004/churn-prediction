@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Churn Insights - News Impact Analysis</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #4f46e5;
+            --color-secondary: #ec4899;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --color-info: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #c7ceea 100%);
+            background-attachment: fixed;
+            color: #334155;
+            min-height: 100vh;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border-radius: 1rem;
+        }
+
+        .sidebar-nav a {
+            color: #475569;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav a:hover {
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        .sidebar-nav a.active {
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.15);
+            border-left: 3px solid #4f46e5;
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+            border-radius: 1rem;
+            padding: 2rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 450px;
+        }
+
+        .insights-container {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            min-height: 200px;
+        }
+
+        .insights-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .insights-content {
+            color: #475569;
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .insights-content p {
+            margin-bottom: 1rem;
+        }
+
+        .insights-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .insights-content li {
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            border-left: 3px solid #4f46e5;
+        }
+
+        .insights-content strong {
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .selected-points-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(79, 70, 229, 0.15);
+            color: #4f46e5;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid rgba(79, 70, 229, 0.2);
+            border-top-color: #4f46e5;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #94a3b8;
+        }
+
+        .empty-state svg {
+            margin: 0 auto 1rem;
+            opacity: 0.5;
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .info-box svg {
+            flex-shrink: 0;
+            color: #3b82f6;
+        }
+
+        .info-box-text {
+            color: #475569;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .btn-clear {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-clear:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flex h-screen">
+        <!-- Static Sidebar -->
+        <aside class="w-64 glass-effect flex-shrink-0 !rounded-none !border-r !border-l-0 !border-t-0 !border-b-0 overflow-y-auto">
+            <div class="p-6">
+                <div class="flex items-center gap-3">
+                     <svg class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <span class="text-2xl font-bold text-gray-800">Churn AI</span>
+                </div>
+            </div>
+            <nav class="mt-8 px-4 sidebar-nav">
+                <a href="{{ url_for('index') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'index' %}active{% endif %}">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ url_for('predict') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'predict' %}active{% endif %}">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    <span>Prediction</span>
+                </a>
+                <a href="{{ url_for('insights') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'insights' %}active{% endif %}">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                    <span>Insights</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-8">
+            <div class="w-full max-w-7xl mx-auto">
+                <!-- Header -->
+                <header class="mb-8">
+                    <h1 class="text-4xl font-bold text-gray-800">Churn Insights & News Impact</h1>
+                    <p class="text-gray-600 mt-2">Analyze how external events correlate with customer churn patterns.</p>
+                </header>
+
+                <!-- Info Box -->
+                <div class="info-box">
+                    <svg class="h-5 w-5 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div class="info-box-text">
+                        <strong>How to use:</strong> Click on any date point in the chart below to select it. Selected dates with significant churn spikes will be analyzed for potential news correlations. Click multiple dates to see comprehensive insights.
+                    </div>
+                </div>
+
+                <!-- Chart Card -->
+                <div class="chart-card">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="chart-title mb-0">Daily Churn Rate Trends</h2>
+                        <button id="clearBtn" class="btn-clear" style="display: none;">Clear Selection</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="churnTimelineChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Insights Container -->
+                <div class="insights-container" id="insightsContainer">
+                    <div class="empty-state">
+                        <svg class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <p class="text-lg font-medium">No dates selected</p>
+                        <p class="text-sm mt-1">Click on date points in the chart above to generate insights</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Data from Flask
+        const timelineData = JSON.parse('{{ timeline_data | safe }}');
+        const newsEvents = JSON.parse('{{ news_events | safe }}');
+        
+        let selectedDates = [];
+        let chartInstance = null;
+
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById('churnTimelineChart').getContext('2d');
+            
+            // Mark dates with news events
+            const pointBackgroundColors = timelineData.dates.map(date => 
+                newsEvents.some(event => event.date === date) ? 'rgba(239, 68, 68, 0.8)' : 'rgba(79, 70, 229, 0.8)'
+            );
+            
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: timelineData.dates,
+                    datasets: [{
+                        label: 'Churn Rate (%)',
+                        data: timelineData.churn_rates,
+                        backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                        borderColor: 'rgba(79, 70, 229, 0.8)',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        hoverBackgroundColor: 'rgba(236, 72, 153, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const date = timelineData.dates[index];
+                            toggleDateSelection(date, index);
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: 'rgba(51, 65, 85, 0.9)',
+                                font: { size: 12, weight: 600 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const date = context.label;
+                                    const event = newsEvents.find(e => e.date === date);
+                                    return event ? `\n📰 ${event.headline}` : '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => value.toFixed(1) + '%',
+                                color: 'rgba(51, 65, 85, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.3)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'rgba(51, 65, 85, 0.7)',
+                                maxRotation: 45,
+                                minRotation: 45
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function toggleDateSelection(date, index) {
+            const dateIndex = selectedDates.indexOf(date);
+            
+            if (dateIndex > -1) {
+                selectedDates.splice(dateIndex, 1);
+            } else {
+                selectedDates.push(date);
+            }
+            
+            updateChartColors();
+            
+            if (selectedDates.length > 0) {
+                document.getElementById('clearBtn').style.display = 'block';
+                fetchInsights();
+            } else {
+                document.getElementById('clearBtn').style.display = 'none';
+                showEmptyState();
+            }
+        }
+
+        function updateChartColors() {
+            chartInstance.data.datasets[0].backgroundColor = timelineData.dates.map((date, idx) => {
+                if (selectedDates.includes(date)) {
+                    return 'rgba(236, 72, 153, 0.8)';
+                }
+                return 'rgba(79, 70, 229, 0.6)';
+            });
+            chartInstance.update();
+        }
+
+        function fetchInsights() {
+            const container = document.getElementById('insightsContainer');
+            container.innerHTML = `
+                <div class="insights-title">
+                    <span class="loading-spinner"></span>
+                    Analyzing selected dates...
+                </div>
+            `;
+
+            fetch('/api/insights', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ dates: selectedDates })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayInsights(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                container.innerHTML = `
+                    <div class="insights-title" style="color: #ef4444;">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Error loading insights
+                    </div>
+                `;
+            });
+        }
+
+        function displayInsights(data) {
+            const container = document.getElementById('insightsContainer');
+            
+            let html = `
+                <div class="insights-title">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    Insights Generated
+                    <span class="selected-points-badge ml-auto">
+                        ${selectedDates.length} ${selectedDates.length === 1 ? 'date' : 'dates'} selected
+                    </span>
+                </div>
+                <div class="insights-content">
+                    ${data.analysis}
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function showEmptyState() {
+            const container = document.getElementById('insightsContainer');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <svg class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <p class="text-lg font-medium">No dates selected</p>
+                    <p class="text-sm mt-1">Click on date points in the chart above to generate insights</p>
+                </div>
+            `;
+        }
+
+        // Clear button handler
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            selectedDates = [];
+            updateChartColors();
+            showEmptyState();
+            document.getElementById('clearBtn').style.display = 'none';
+        });
+
+        // Initialize
+        initChart();
+    </script>
+</body>
+</html>

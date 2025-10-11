@@ -5,6 +5,8 @@ import numpy as np
 import folium
 from folium.plugins import HeatMap
 import random
+from datetime import datetime, timedelta # New import
+from churn_insights import generate_churn_insights
 
 import joblib
 import shap
@@ -22,6 +24,14 @@ except FileNotFoundError:
 
 # Initialize the Flask application
 app = Flask(__name__)
+
+# --- Mock News Events for the Insights Page ---
+# In a real application, this would come from a database or an external API
+MOCK_NEWS_EVENTS = [
+    {"date": (datetime.now() - timedelta(days=25)).strftime('%Y-%m-%d'), "headline": "Major Competitor Announces 20% Price Cut"},
+    {"date": (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%d'), "headline": "New Federal Regulations Impact Insurance Premiums"},
+]
+
 
 def load_and_prepare_data():
     """
@@ -63,174 +73,85 @@ def load_and_prepare_data():
 
 def generate_churn_heatmap(df, sample_size=5000):
     """
-    Generates a folium map with layer toggles:
-    - Retained Customers (default visible)
-    - Churned Customers (default visible)
-    - High-Value Customers (default hidden)
-    Returns HTML for embedding in Flask.
+    Generates a folium map with layer toggles.
     """
-    # Drop rows without lat/lon
     df = df.dropna(subset=['LATITUDE', 'LONGITUDE'])
     if len(df) > sample_size:
         df = df.sample(n=sample_size, random_state=42)
  
     df_stayed = df[df['CHURN'] == 0]
     df_left = df[df['CHURN'] == 1]
-    df_high_value = df[df['CURR_ANN_AMT'] >= df['CURR_ANN_AMT'].quantile(0.9)]  # top 10% premium
+    df_high_value = df[df['CURR_ANN_AMT'] >= df['CURR_ANN_AMT'].quantile(0.9)]
  
-    # Base map
-    m = folium.Map(
-        location=[df['LATITUDE'].mean(), df['LONGITUDE'].mean()],
-        zoom_start=10,
-        tiles='OpenStreetMap'
-    )
+    m = folium.Map(location=[df['LATITUDE'].mean(), df['LONGITUDE'].mean()], zoom_start=10, tiles='OpenStreetMap')
  
-    # --- Feature Groups ---
-    # Retained and Churned layers will be added directly to map so they show by default
     fg_stayed = folium.FeatureGroup(name='Retained Customers', show=True)
     fg_left = folium.FeatureGroup(name='Churned Customers', show=True)
     fg_high = folium.FeatureGroup(name='High-Value Customers', show=False)
  
-    # HeatMaps
-    HeatMap(
-        df_stayed[['LATITUDE', 'LONGITUDE']],
-        radius=8,
-        blur=12,
-        gradient={0.2: 'green', 0.8: 'lime'},
-        min_opacity=0.5
-    ).add_to(fg_stayed)
+    HeatMap(df_stayed[['LATITUDE', 'LONGITUDE']], radius=8, blur=12, gradient={0.2: 'green', 0.8: 'lime'}, min_opacity=0.5).add_to(fg_stayed)
+    HeatMap(df_left[['LATITUDE', 'LONGITUDE']], radius=8, blur=10, gradient={0.2: 'yellow', 0.8: 'red'}, min_opacity=0.5).add_to(fg_left)
+    HeatMap(df_high_value[['LATITUDE', 'LONGITUDE']], radius=3, blur=8, gradient={0.2: 'blue', 0.8: 'cyan'}, min_opacity=0.6).add_to(fg_high)
  
-    HeatMap(
-        df_left[['LATITUDE', 'LONGITUDE']],
-        radius=8,
-        blur=10,
-        gradient={0.2: 'yellow', 0.8: 'red'},
-        min_opacity=0.5
-    ).add_to(fg_left)
- 
-    HeatMap(
-        df_high_value[['LATITUDE', 'LONGITUDE']],
-        radius=3,
-        blur=8,
-        gradient={0.2: 'blue', 0.8: 'cyan'},
-        min_opacity=0.6
-    ).add_to(fg_high)
- 
-    # Add layers to map
     fg_stayed.add_to(m)
     fg_left.add_to(m)
     fg_high.add_to(m)
  
-    # Layer Control — collapsed for a cleaner UI
     folium.LayerControl(collapsed=True, position='topright').add_to(m)
  
     return m._repr_html_()
+
 # Load the data once when the app starts
 df = load_and_prepare_data()
 
-def predict_churn_probability(customer_data):
-    """Simulates a model prediction."""
-    # A simple simulation: higher premium and lower tenure increase churn risk
-    base_risk = 0.1
-    risk_from_premium = (customer_data['CURR_ANN_AMT'] / 2000) * 0.3
-    risk_from_tenure = ((3650 - customer_data['DAYS_TENURE']) / 3650) * 0.3
-    risk_from_credit = 0 if customer_data['GOOD_CREDIT'] else 0.1
-    
-    total_risk = base_risk + risk_from_premium + risk_from_tenure + risk_from_credit
-    return min(random.uniform(total_risk - 0.05, total_risk + 0.05), 0.95)
-
-def get_shap_explanation(customer_data):
-    """Simulates a SHAP explanation for a prediction."""
-    # These values represent the positive (red) or negative (green) impact on churn risk
-    explanation = [
-        {"feature": "Tenure", "value": -random.uniform(0.1, 0.3)},
-        {"feature": "Annual Premium", "value": random.uniform(0.05, 0.25)},
-        {"feature": "Income", "value": -random.uniform(0.05, 0.15)},
-        {"feature": "Good Credit", "value": -random.uniform(0.05, 0.1) if customer_data['GOOD_CREDIT'] else random.uniform(0.05, 0.1)},
-        {"feature": "Age", "value": -random.uniform(0.01, 0.05)}
-    ]
-    random.shuffle(explanation)
-    return {"base_value": 0.15, "explanation": explanation}
-
+# ==============================================================================
+# --- DASHBOARD PAGE ---
+# ==============================================================================
 @app.route('/')
 def index():
     """
     Renders the main dashboard page.
-    Passes the aggregated data to the template.
     """
     if df.empty:
         return "Error: Could not load dataset. Please check file paths."
-
-    # --- Prepare data for visualizations ---
+    
     churned_df = df[df['CHURN'] == 1]
-
-    # 1. KPI Data
     total_customers = len(df)
     churned_customers = len(churned_df)
     churn_rate = (churned_customers / total_customers) * 100 if total_customers > 0 else 0
-    
-    # 2. Donut Chart: Churn vs. Retained
     retained_customers = total_customers - churned_customers
-    churn_overview_data = {
-        'labels': ['Retained', 'Churned'],
-        'data': [int(retained_customers), int(churned_customers)]
-    }
-
-    # 3. Bar Chart: Churn by Income Group
+    churn_overview_data = {'labels': ['Retained', 'Churned'], 'data': [int(retained_customers), int(churned_customers)]}
+    
+    # Other data preparations... (code omitted for brevity, it's the same as your original)
     income_bins = [0, 30000, 60000, 100000, 150000, df['INCOME'].max() + 1]
     income_labels = ['< $30k', '$30k-$60k', '$60k-$100k', '$100k-$150k', '$150k+']
     df['INCOME_GROUP'] = pd.cut(df['INCOME'], bins=income_bins, labels=income_labels, right=False)
     churn_by_income = df.groupby('INCOME_GROUP', observed=True)['CHURN'].value_counts(normalize=True).unstack().fillna(0)
-    churn_by_income_data = {
-        'labels': churn_by_income.index.tolist(),
-        'churn_rate': (churn_by_income[1] * 100).tolist()
-    }
+    churn_by_income_data = {'labels': churn_by_income.index.tolist(), 'churn_rate': (churn_by_income[1] * 100).tolist()}
     
-    # 4. Pie Chart: Distribution of Churned Customers by Good Credit
     credit_churn_counts = churned_df['GOOD_CREDIT'].value_counts()
-    churn_by_credit_pie_data = {
-        'labels': ['No Good Credit', 'Has Good Credit'],
-        'data': [int(credit_churn_counts.get(False, 0)), int(credit_churn_counts.get(True, 0))]
-    }
+    churn_by_credit_pie_data = {'labels': ['No Good Credit', 'Has Good Credit'], 'data': [int(credit_churn_counts.get(False, 0)), int(credit_churn_counts.get(True, 0))]}
     
-    # 5. Pie Chart: Distribution of Churned Customers by Marital Status
     marital_churn_counts = churned_df.groupby('MARITAL_STATUS').size()
-    churn_by_marital_pie_data = {
-        'labels': marital_churn_counts.index.tolist(),
-        'data': marital_churn_counts.values.tolist()
-    }
-
-    # 6. Bar Chart: Churn by Annual Premium
+    churn_by_marital_pie_data = {'labels': marital_churn_counts.index.tolist(), 'data': marital_churn_counts.values.tolist()}
+    
     premium_bins = [0, 500, 1000, 1500, 2000, df['CURR_ANN_AMT'].max() + 1]
     premium_labels = ['< $500', '$500-$1k', '$1k-$1.5k', '$1.5k-$2k', '$2k+']
     df['PREMIUM_GROUP'] = pd.cut(df['CURR_ANN_AMT'], bins=premium_bins, labels=premium_labels, right=False)
     churn_by_premium = df.groupby('PREMIUM_GROUP', observed=True)['CHURN'].value_counts(normalize=True).unstack().fillna(0)
-    churn_by_premium_data = {
-        'labels': churn_by_premium.index.tolist(),
-        'churn_rate': (churn_by_premium[1] * 100).tolist()
-    }
+    churn_by_premium_data = {'labels': churn_by_premium.index.tolist(), 'churn_rate': (churn_by_premium[1] * 100).tolist()}
     
-    # 7. Bar Chart: Churn Rate by Customer Tenure
     tenure_bins = [0, 365, 365*3, 365*5, 365*10, df['DAYS_TENURE'].max() + 1]
     tenure_labels = ['0-1 Yr', '1-3 Yrs', '3-5 Yrs', '5-10 Yrs', '10+ Yrs']
     df['TENURE_GROUP'] = pd.cut(df['DAYS_TENURE'], bins=tenure_bins, labels=tenure_labels, right=False)
     churn_by_tenure = df.groupby('TENURE_GROUP', observed=True)['CHURN'].value_counts(normalize=True).unstack().fillna(0)
-    churn_by_tenure_data = {
-        'labels': churn_by_tenure.index.tolist(),
-        'churn_rate': (churn_by_tenure[1] * 100).tolist()
-    }
-
-    # 8. Pie Chart for Churn Distribution by Home Ownership
+    churn_by_tenure_data = {'labels': churn_by_tenure.index.tolist(), 'churn_rate': (churn_by_tenure[1] * 100).tolist()}
+    
     owner_churn_counts = churned_df.groupby('HOME_OWNER').size()
-    churn_by_owner_pie_data = {
-        'labels': ['Renter', 'Owner'],
-        'data': owner_churn_counts.values.tolist()
-    }
-
-    # 10. Geospatial Churn Analysis Heatmap
+    churn_by_owner_pie_data = {'labels': ['Renter', 'Owner'], 'data': owner_churn_counts.values.tolist()}
+    
     churn_map_html = generate_churn_heatmap(df)
  
-    # Pass all data to the template
     return render_template(
         'index.html',
         total_customers=f"{total_customers:,}",
@@ -243,71 +164,134 @@ def index():
         churn_by_marital_pie_data=json.dumps(churn_by_marital_pie_data),
         churn_by_tenure_data=json.dumps(churn_by_tenure_data),
         churn_by_owner_pie_data=json.dumps(churn_by_owner_pie_data),
-        churn_map_html=churn_map_html  # <-- pass Folium map HTML
+        churn_map_html=churn_map_html
     )
-    
+
+# ==============================================================================
+# --- PREDICTION PAGE ---
+# ==============================================================================
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
     """Handles the individual customer prediction page."""
     if request.method == 'POST':
         if not all([model, marital_status_encoder, explainer]):
             return "Error: Model components not loaded. Cannot make predictions.", 500
-
- 
-        # 1. Get and correctly encode data from the form
+        
         marital_status_str = request.form['marital_status']
         marital_status_encoded = marital_status_encoder.transform([marital_status_str])[0]
 
         customer_data = {
-            'curr_ann_amt': float(request.form['annual_premium']),
-            'days_tenure': int(request.form['tenure']),
-            'age_in_years': int(request.form['age']),
-            'income': float(request.form['income']),
+            'curr_ann_amt': float(request.form['annual_premium']), 'days_tenure': int(request.form['tenure']),
+            'age_in_years': int(request.form['age']), 'income': float(request.form['income']),
             'has_children': 1 if request.form.get('has_children') == 'on' else 0,
-            'marital_status': marital_status_encoded,
-            'home_owner': int(request.form['home_owner']),
+            'marital_status': marital_status_encoded, 'home_owner': int(request.form['home_owner']),
             'good_credit': 1 if request.form.get('good_credit') == 'on' else 0,
         }
-
-        # 2. Create a pandas DataFrame to preserve feature names for the model and explainer
-        feature_names = [
-            'curr_ann_amt', 'days_tenure', 'age_in_years', 'income',
-            'has_children', 'marital_status', 'home_owner', 'good_credit'
-        ]
+        
+        feature_names = ['curr_ann_amt', 'days_tenure', 'age_in_years', 'income', 'has_children', 'marital_status', 'home_owner', 'good_credit']
         x_df = pd.DataFrame([customer_data], columns=feature_names)
 
-        # 3. Get the prediction probability
-        # The result is a NumPy float, so we immediately convert it
         probability = float(model.predict_proba(x_df)[0][1])
-
-        # 4. Get the SHAP explanation for this single prediction
         shap_values = explainer(x_df)
-
-        # 5. Format the explanation for the waterfall chart, converting all values
-        explanation_list = []
-        for i, feature in enumerate(feature_names):
-            explanation_list.append({
-                "feature": feature.replace('_', ' ').title(),
-                # CRITICAL FIX: Convert NumPy float to standard Python float
-                "value": float(shap_values.values[0][i])
-            })
+        
+        explanation_list = [
+            {"feature": feature.replace('_', ' ').title(), "value": float(shap_values.values[0][i])}
+            for i, feature in enumerate(feature_names)
+        ]
 
         explanation_json = {
-            # CRITICAL FIX: Convert NumPy float to standard Python float
             "base_value": float(shap_values.base_values[0]),
             "explanation": sorted(explanation_list, key=lambda item: abs(item['value']), reverse=True)
         }
         
-        # 6. Package all data for the template, now using web-safe types
-        pred_data = {
-            "probability": probability,
-            "explanation": explanation_json
-        }
-        print(f"Prediction data being sent to template: {pred_data}")
+        pred_data = {"probability": probability, "explanation": explanation_json}
         return render_template('prediction.html', prediction_data=pred_data)
     else:
         return render_template('prediction.html')
 
 
+# ==============================================================================
+# --- NEW: INSIGHTS PAGE & API ---
+# ==============================================================================
+
+def generate_ai_analysis(dates, news_events):
+    """
+    Simulates an AI model generating insights for selected dates.
+    In a real-world scenario, this would involve complex analysis or calls to a GenAI API.
+    """
+    if not dates:
+        return "<p>No dates were provided for analysis.</p>"
+
+    # Find relevant news for the selected dates
+    relevant_news = [event for event in news_events if event['date'] in dates]
+
+    # Build the HTML response string
+    analysis_html = f"<p>Analysis for {len(dates)} selected date(s):</p>"
+    analysis_html += "<ul>"
+    
+    for date in sorted(dates):
+        news_item = next((item for item in relevant_news if item['date'] == date), None)
+        if news_item:
+            analysis_html += f"<li><strong>On {date}:</strong> The churn spike likely correlates with the news event: <em>'{news_item['headline']}'</em>. This event may have caused customer uncertainty, leading to cancellations.</li>"
+        else:
+            analysis_html += f"<li><strong>On {date}:</strong> A notable churn spike was observed. No direct external news event was found in our data, suggesting the cause could be internal, such as a recent price change, service outage, or a competitor's marketing campaign.</li>"
+
+    analysis_html += "</ul>"
+    
+    if len(dates) > 1:
+        analysis_html += "<p class='mt-4'><strong>Overall Trend:</strong> The multiple selected churn spikes suggest a period of market volatility or heightened customer sensitivity. Recommend reviewing internal communications and competitor activities around these dates.</p>"
+        
+    return analysis_html
+
+@app.route('/insights')
+def insights():
+    """
+    Renders the news impact analysis page.
+    Generates mock data for the timeline chart.
+    """
+    # Generate 60 days of sample data for the chart
+    base_date = datetime.now()
+    dates = [(base_date - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(60)][::-1]
+    
+    # Simulate churn rates with some random spikes
+    base_churn = 1.5
+    churn_rates = [random.uniform(base_churn - 0.5, base_churn + 0.5) for _ in dates]
+    # Add spikes on the days we have news events
+    for event in MOCK_NEWS_EVENTS:
+        if event['date'] in dates:
+            idx = dates.index(event['date'])
+            churn_rates[idx] = random.uniform(3.5, 4.5) # Make it a clear spike
+
+    timeline_data = {
+        "dates": dates,
+        "churn_rates": [round(rate, 2) for rate in churn_rates]
+    }
+
+    return render_template(
+        'insights.html',
+        timeline_data=json.dumps(timeline_data),
+        news_events=json.dumps(MOCK_NEWS_EVENTS)
+    )
+
+@app.route('/api/insights', methods=['POST'])
+def get_insights():
+    """
+    API endpoint that receives dates and returns an AI-generated analysis.
+    """
+    data = request.get_json()
+    selected_dates = data.get('dates', [])
+    
+    # Call the function to get the analysis for the selected dates
+    # We pass the mock news events to the function so it can correlate them
+    analysis_text = generate_churn_insights(selected_dates)
+    
+    print(f"Generated analysis for dates {selected_dates}: {analysis_text}")
+    
+    return jsonify({'analysis': analysis_text})
+
+
+# ==============================================================================
+# --- APP RUN ---
+# ==============================================================================
 if __name__ == '__main__':
     app.run(debug=True)
