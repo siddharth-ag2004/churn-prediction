@@ -14,10 +14,10 @@ def load_and_prepare_data():
     """
     try:
         # Load the datasets
-        df_customer = pd.read_csv('../dataset/archive/customer.csv')
-        df_address = pd.read_csv('../dataset/archive/address.csv')
-        df_termination = pd.read_csv('../dataset/archive/termination.csv')
-        df_demographic = pd.read_csv('../dataset/archive/demographic.csv')
+        df_customer = pd.read_csv('../dataset/archive/customer.csv',engine="pyarrow")
+        df_address = pd.read_csv('../dataset/archive/address.csv',engine="pyarrow")
+        df_termination = pd.read_csv('../dataset/archive/termination.csv',engine="pyarrow")
+        df_demographic = pd.read_csv('../dataset/archive/demographic.csv',engine="pyarrow")
 
         # Merge the dataframes
         df = pd.merge(df_customer, df_address, on='ADDRESS_ID')
@@ -45,6 +45,7 @@ def load_and_prepare_data():
         print("Error: One or more dataset files not found.")
         return pd.DataFrame()
 
+
 def generate_churn_heatmap(df, sample_size=5000):
     """
     Generates a folium HeatMap showing churned vs retained customers.
@@ -54,17 +55,17 @@ def generate_churn_heatmap(df, sample_size=5000):
     df = df.dropna(subset=['LATITUDE', 'LONGITUDE'])
     if len(df) > sample_size:
         df = df.sample(n=sample_size, random_state=42)
-
+ 
     df_stayed = df[df['CHURN'] == 0]
     df_left = df[df['CHURN'] == 1]
-
+ 
     # Base map — zoomed in more
     m = folium.Map(
         location=[df['LATITUDE'].mean(), df['LONGITUDE'].mean()],
-        zoom_start=11,
+        zoom_start=10,
         tiles='OpenStreetMap'
     )
-
+ 
     # HeatMap for customers who stayed
     HeatMap(
         df_stayed[['LATITUDE', 'LONGITUDE']],
@@ -73,7 +74,7 @@ def generate_churn_heatmap(df, sample_size=5000):
         gradient={0.2: 'green', 0.8: 'lime'},
         min_opacity=0.5
     ).add_to(m)
-
+ 
     # HeatMap for customers who left
     HeatMap(
         df_left[['LATITUDE', 'LONGITUDE']],
@@ -82,10 +83,8 @@ def generate_churn_heatmap(df, sample_size=5000):
         gradient={0.2: 'yellow', 0.8: 'red'},
         min_opacity=0.5
     ).add_to(m)
-
+ 
     return m._repr_html_()
-
-
 # Load the data once when the app starts
 df = load_and_prepare_data()
 
@@ -99,10 +98,11 @@ def index():
         return "Error: Could not load dataset. Please check file paths."
 
     # --- Prepare data for visualizations ---
+    churned_df = df[df['CHURN'] == 1]
 
     # 1. KPI Data
     total_customers = len(df)
-    churned_customers = df['CHURN'].sum()
+    churned_customers = len(churned_df)
     churn_rate = (churned_customers / total_customers) * 100 if total_customers > 0 else 0
     
     # 2. Donut Chart: Churn vs. Retained
@@ -123,7 +123,6 @@ def index():
     }
     
     # 4. Pie Chart: Distribution of Churned Customers by Good Credit
-    churned_df = df[df['CHURN'] == 1]
     credit_churn_counts = churned_df['GOOD_CREDIT'].value_counts()
     churn_by_credit_pie_data = {
         'labels': ['No Good Credit', 'Has Good Credit'],
@@ -146,10 +145,8 @@ def index():
         'labels': churn_by_premium.index.tolist(),
         'churn_rate': (churn_by_premium[1] * 100).tolist()
     }
-
-    # --- NEW PLOTS DATA ---
     
-    # 7. NEW Bar Chart: Churn Rate by Customer Tenure
+    # 7. Bar Chart: Churn Rate by Customer Tenure
     tenure_bins = [0, 365, 365*3, 365*5, 365*10, df['DAYS_TENURE'].max() + 1]
     tenure_labels = ['0-1 Yr', '1-3 Yrs', '3-5 Yrs', '5-10 Yrs', '10+ Yrs']
     df['TENURE_GROUP'] = pd.cut(df['DAYS_TENURE'], bins=tenure_bins, labels=tenure_labels, right=False)
@@ -159,25 +156,16 @@ def index():
         'churn_rate': (churn_by_tenure[1] * 100).tolist()
     }
 
-    # 8. NEW Bar Chart: Churn Rate by Home Ownership
+    # 8. Pie Chart for Churn Distribution by Home Ownership
     owner_churn_counts = churned_df.groupby('HOME_OWNER').size()
     churn_by_owner_pie_data = {
-        'labels': ['Renter', 'Owner'],
+        'labels': owner_churn_counts.index.tolist(),
         'data': owner_churn_counts.values.tolist()
     }
 
-    # 9. NEW Heatmap: Correlation of Numeric Features
-    numeric_cols = ['AGE_IN_YEARS', 'INCOME', 'DAYS_TENURE', 'CURR_ANN_AMT', 'CHURN']
-    corr_matrix = df[numeric_cols].corr()
-    heatmap_data = []
-    for i, col1 in enumerate(corr_matrix.columns):
-        for j, col2 in enumerate(corr_matrix.columns):
-            heatmap_data.append({'x': col1, 'y': col2, 'v': round(corr_matrix.iloc[i, j], 2)})
-    heatmap_labels = corr_matrix.columns.tolist()
-
-    # 10. Folium Heatmap
+    # 10. Geospatial Churn Analysis Heatmap
     churn_map_html = generate_churn_heatmap(df)
-
+ 
     # Pass all data to the template
     return render_template(
         'index.html',
@@ -190,9 +178,7 @@ def index():
         churn_by_credit_pie_data=json.dumps(churn_by_credit_pie_data),
         churn_by_marital_pie_data=json.dumps(churn_by_marital_pie_data),
         churn_by_tenure_data=json.dumps(churn_by_tenure_data),
-        churn_by_owner_data=json.dumps(churn_by_owner_pie_data),
-        heatmap_data=json.dumps(heatmap_data),
-        heatmap_labels=json.dumps(heatmap_labels),
+        churn_by_owner_pie_data=json.dumps(churn_by_owner_pie_data),
         churn_map_html=churn_map_html  # <-- pass Folium map HTML
     )
 
