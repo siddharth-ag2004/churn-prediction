@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Analysis</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Matrix/Heatmap Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@^1.1/dist/chartjs-chart-matrix.min.js"></script>
+    <!-- Leaflet.js for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .chart-container {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            height: 450px; /* Increased height for better visibility */
+        }
+        .kpi-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        #churnMap {
+            height: 100%;
+            border-radius: 0.75rem;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header Section -->
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-gray-800">Dashboard</h1>
+        </header>
+
+        <!-- KPI Cards Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="kpi-card flex flex-col justify-center items-center text-center">
+                <h3 class="text-xl font-semibold text-indigo-200">Total Customers</h3>
+                <p class="text-4xl font-bold mt-2">{{ total_customers }}</p>
+            </div>
+            <div class="kpi-card flex flex-col justify-center items-center text-center">
+                <h3 class="text-xl font-semibold text-indigo-200">Churned Customers</h3>
+                <p class="text-4xl font-bold mt-2">{{ churned_customers }}</p>
+            </div>
+            <div class="kpi-card flex flex-col justify-center items-center text-center">
+                <h3 class="text-xl font-semibold text-indigo-200">Overall Churn Rate</h3>
+                <p class="text-4xl font-bold mt-2">{{ churn_rate }}%</p>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Churn Overview Donut Chart -->
+            <div class="chart-container pb-16">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Customer Overview</h2>
+                <canvas id="churnOverviewChart"></canvas>
+            </div>
+            
+            <!-- Churn Distribution by Credit Status Pie Chart -->
+            <div class="chart-container pb-16">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Churn Distribution by Credit Status</h2>
+                <canvas id="churnByCreditPieChart"></canvas>
+            </div>
+
+            <!-- Churn Distribution by Marital Status Pie Chart -->
+            <div class="chart-container pb-16">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Churn Distribution by Marital Status</h2>
+                <canvas id="churnByMaritalPieChart"></canvas>
+            </div>
+
+            <!-- NEW: Churn Rate by Home Ownership -->
+            <div class="chart-container pb-16">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Churn Rate by Home Ownership</h2>
+                <canvas id="churnByOwnerChart"></canvas>
+            </div>
+
+            <!-- Churn by Annual Premium Bar Chart -->
+            <div class="chart-container pb-16">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Churn Rate by Annual Premium</h2>
+                <canvas id="churnByPremiumChart"></canvas>
+            </div>
+
+            <!-- Churn by Income Bar Chart -->
+            <div class="chart-container pb-16">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Churn Rate by Income Bracket</h2>
+                <canvas id="churnByIncomeChart"></canvas>
+            </div>
+
+            <!-- NEW: Churn Rate by Customer Tenure -->
+            <div class="chart-container pb-16 lg:col-span-2">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Churn Rate by Customer Tenure</h2>
+                <canvas id="churnByTenureChart"></canvas>
+            </div>
+
+            <!-- NEW: Correlation Heatmap -->
+            <div class="chart-container pb-16 lg:col-span-2">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Feature Correlation Heatmap</h2>
+                <canvas id="correlationHeatmap"></canvas>
+            </div>
+            
+            <!-- NEW: Geospatial Churn Map -->
+            <div class="chart-container pb-16 lg:col-span-2">
+                 <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Geospatial Churn Hotspots</h2>
+                <div id="churnMap"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Chart.js Initialization ---
+
+        // Helper function for consistent chart styling for Bar charts
+        const getBarChartOptions = (title) => ({
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Churn Rate (%)'
+                    },
+                    ticks: {
+                        callback: function(value) { return value.toFixed(1) + '%' }
+                    }
+                }
+            }
+        });
+
+        // Helper function for consistent chart styling for Pie/Doughnut charts
+        const getPieChartOptions = () => ({
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        });
+
+        // 1. Churn Overview Donut Chart
+        const churnOverviewData = JSON.parse('{{ churn_overview_data | safe }}');
+        new Chart(document.getElementById('churnOverviewChart'), {
+            type: 'doughnut',
+            data: {
+                labels: churnOverviewData.labels,
+                datasets: [{
+                    label: 'Customers',
+                    data: churnOverviewData.data,
+                    backgroundColor: ['#4ade80', '#f87171'],
+                    borderColor: ['#22c55e', '#ef4444'],
+                    borderWidth: 1
+                }]
+            },
+            options: getPieChartOptions()
+        });
+
+        // 2. Churn Distribution by Credit Status Pie Chart
+        const churnByCreditPieData = JSON.parse('{{ churn_by_credit_pie_data | safe }}');
+        new Chart(document.getElementById('churnByCreditPieChart'), {
+            type: 'pie',
+            data: {
+                labels: churnByCreditPieData.labels,
+                datasets: [{
+                    label: 'Churned Customers',
+                    data: churnByCreditPieData.data,
+                    backgroundColor: ['#fb923c', '#60a5fa'],
+                    borderColor: ['#f97316', '#3b82f6'],
+                    borderWidth: 1
+                }]
+            },
+            options: getPieChartOptions()
+        });
+
+        // 3. Churn Distribution by Marital Status Pie Chart
+        const churnByMaritalPieData = JSON.parse('{{ churn_by_marital_pie_data | safe }}');
+        new Chart(document.getElementById('churnByMaritalPieChart'), {
+            type: 'pie',
+            data: {
+                labels: churnByMaritalPieData.labels,
+                datasets: [{
+                    label: 'Churned Customers',
+                    data: churnByMaritalPieData.data,
+                    backgroundColor: ['#f87171', '#fbbf24', '#34d399', '#a78bfa', '#a8a29e'],
+                    borderColor: ['#ef4444', '#f59e0b', '#059669', '#8b5cf6', '#78716c'],
+                    borderWidth: 1
+                }]
+            },
+            options: getPieChartOptions()
+        });
+
+        // 4. Churn by Annual Premium Bar Chart
+        const churnByPremiumData = JSON.parse('{{ churn_by_premium_data | safe }}');
+        new Chart(document.getElementById('churnByPremiumChart'), {
+            type: 'bar',
+            data: {
+                labels: churnByPremiumData.labels,
+                datasets: [{
+                    label: 'Churn Rate (%)',
+                    data: churnByPremiumData.churn_rate,
+                    backgroundColor: '#a78bfa',
+                    borderColor: '#8b5cf6',
+                    borderWidth: 1
+                }]
+            },
+            options: getBarChartOptions()
+        });
+        
+        // 5. Churn by Income Bar Chart
+        const churnByIncomeData = JSON.parse('{{ churn_by_income_data | safe }}');
+        new Chart(document.getElementById('churnByIncomeChart'), {
+            type: 'bar',
+            data: {
+                labels: churnByIncomeData.labels,
+                datasets: [{
+                    label: 'Churn Rate (%)',
+                    data: churnByIncomeData.churn_rate,
+                    backgroundColor: '#f472b6',
+                    borderColor: '#ec4899',
+                    borderWidth: 1
+                }]
+            },
+            options: getBarChartOptions()
+        });
+
+        // NEW Chart 6: Churn Rate by Customer Tenure
+        const churnByTenureData = JSON.parse('{{ churn_by_tenure_data | safe }}');
+        new Chart(document.getElementById('churnByTenureChart'), {
+            type: 'bar',
+            data: {
+                labels: churnByTenureData.labels,
+                datasets: [{
+                    label: 'Churn Rate (%)',
+                    data: churnByTenureData.churn_rate,
+                    backgroundColor: '#34d399',
+                    borderColor: '#059669',
+                    borderWidth: 1
+                }]
+            },
+            options: getBarChartOptions()
+        });
+
+        // NEW Chart 7: Churn Rate by Home Ownership
+        const churnByOwnerData = JSON.parse('{{ churn_by_owner_data | safe }}');
+        new Chart(document.getElementById('churnByOwnerChart'), {
+            type: 'pie',
+            data: {
+                labels: churnByOwnerData.labels,
+                datasets: [{
+                    label: 'Churned Customers',
+                    data: churnByOwnerData.data,
+                    backgroundColor: ['#fb923c', '#60a5fa'],
+                    borderColor: ['#f97316', '#3b82f6'],
+                    borderWidth: 1
+                }]
+            },
+            options: getPieChartOptions()
+        });
+
+        // NEW Chart 8: Correlation Heatmap
+        const heatmapData = JSON.parse('{{ heatmap_data | safe }}');
+        const heatmapLabels = JSON.parse('{{ heatmap_labels | safe }}');
+        new Chart(document.getElementById('correlationHeatmap'), {
+            type: 'matrix',
+            data: {
+                labels: heatmapLabels,
+                datasets: [{
+                    label: 'Correlation Matrix',
+                    data: heatmapData,
+                    backgroundColor(ctx) {
+                        const value = ctx.dataset.data[ctx.dataIndex].v;
+                        const alpha = (Math.abs(value) * 0.8) + 0.2; // Opacity based on strength
+                        return value < 0 ? `rgba(239, 68, 68, ${alpha})` : `rgba(34, 197, 94, ${alpha})`; // Red for negative, Green for positive
+                    },
+                    borderColor: 'white',
+                    borderWidth: 2,
+                    width: ({chart}) => (chart.chartArea || {}).width / heatmapLabels.length - 1,
+                    height: ({chart}) => (chart.chartArea || {}).height / heatmapLabels.length - 1,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title() { return ''; },
+                            label(context) {
+                                const v = context.dataset.data[context.dataIndex];
+                                return `${v.x} to ${v.y}: ${v.v}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { type: 'category', labels: heatmapLabels, grid: { display: false } },
+                    y: { type: 'category', labels: heatmapLabels, offset: true, grid: { display: false } }
+                }
+            }
+        });
+        
+        // --- Leaflet.js Map Initialization ---
+        // NEW Chart 9: Geospatial Map
+        const mapData = JSON.parse('{{ map_data | safe }}');
+        // Initialize the map centered on the USA
+        const map = L.map('churnMap').setView([39.8283, -98.5795], 4); 
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Function to determine circle color based on churn rate
+        function getColor(churnRate) {
+            return churnRate > 0.18 ? '#b91c1c' : // dark red
+                   churnRate > 0.16 ? '#ef4444' : // red
+                   churnRate > 0.14 ? '#f97316' : // orange
+                                      '#22c55e';  // green
+        }
+
+        mapData.forEach(state => {
+            if (state.LATITUDE && state.LONGITUDE) {
+                const circle = L.circleMarker([state.LATITUDE, state.LONGITUDE], {
+                    radius: 5 + Math.log(state.count + 1) * 2, // Radius based on customer count
+                    fillColor: getColor(state.churn_rate),
+                    color: "#000",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+                
+                // Add a popup
+                circle.bindPopup(
+                    `<strong>${state.STATE}</strong><br>` +
+                    `Churn Rate: ${(state.churn_rate * 100).toFixed(2)}%<br>` +
+                    `Total Customers: ${state.count.toLocaleString()}`
+                );
+            }
+        });
+
+    </script>
+</body>
+</html>
