@@ -36,11 +36,11 @@
 
         /* Base class for all glass elements */
         .glass-effect {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.45);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
             border-radius: 1rem;
         }
 
@@ -151,9 +151,28 @@
                                         <label for="age" class="block text-sm font-medium text-gray-700 mb-2">Age in Years</label>
                                         <input type="number" id="age" name="age" class="w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" value="45" required>
                                     </div>
+                                    <div>
+                                        <label for="marital_status" class="block text-sm font-medium text-gray-700 mb-2">Marital Status</label>
+                                        <select id="marital_status" name="marital_status" class="w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                                            <option value="Married">Married</option>
+                                            <option value="Single">Single</option>
+                                            <option value="Unknown">Unknown</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="home_owner" class="block text-sm font-medium text-gray-700 mb-2">Home Ownership</label>
+                                        <select id="home_owner" name="home_owner" class="w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                                            <option value="0">Renter</option>
+                                            <option value="1">Owner</option>
+                                        </select>
+                                    </div>
                                     <div class="flex items-center pt-2">
                                         <input type="checkbox" id="good_credit" name="good_credit" class="h-4 w-4 rounded" checked>
                                         <label for="good_credit" class="ml-3 block text-sm font-medium text-gray-700">Has Good Credit?</label>
+                                    </div>
+                                    <div class="flex items-center pt-2">
+                                        <input type="checkbox" id="has_children" name="has_children" class="h-4 w-4 rounded">
+                                        <label for="has_children" class="ml-3 block text-sm font-medium text-gray-700">Has Children?</label>
                                     </div>
                                 </div>
                                 <button type="submit" class="mt-8 w-full py-3 px-4 rounded-lg hover:shadow-lg transition-all">
