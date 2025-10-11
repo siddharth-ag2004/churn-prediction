@@ -182,5 +182,28 @@ def index():
         churn_map_html=churn_map_html  # <-- pass Folium map HTML
     )
 
+from flask import Flask, request, jsonify, redirect
+from urllib.parse import quote
+from email_draft import generate_churn_email
+
+@app.route('/generate_email_draft')
+def generate_email_draft():
+    customer_name = request.args.get("name", "Valued Customer")
+    discount = int(request.args.get("discount", 10))
+    email_text = generate_churn_email(customer_name, discount)
+
+    # Extract subject line and body separately
+    subject_line = f"We're Sorry to See You Go, {customer_name} — A Special Offer from Chubb"
+    
+    # Encode for mailto link
+    mailto_link = (
+        f"mailto:?subject={quote(subject_line)}"
+        f"&body={quote(email_text)}"
+    )
+
+    # Redirect user to open their mail client with the pre-filled draft
+    return redirect(mailto_link)
+
+
 if __name__ == '__main__':
     app.run(debug=True)

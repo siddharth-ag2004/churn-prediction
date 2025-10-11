@@ -136,6 +136,23 @@
                     </div>
                 </div>
 
+                <!-- Email Draft Generator Button -->
+                <div class="flex justify-end mb-8">
+                    <button 
+                        onclick="openEmailDraft('John Doe', 15)" 
+                        class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium shadow hover:bg-indigo-700 transition">
+                        ✉️ Generate Churn Follow-Up Email
+                    </button>
+                </div>
+
+                <script>
+                function openEmailDraft(customerName, discount) {
+                    const url = `/generate_email_draft?name=${encodeURIComponent(customerName)}&discount=${discount}`;
+                    window.location.href = url;
+                }
+                </script>
+
+
                 <!-- Charts Section -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="chart-container pb-16"><h2 class="text-lg font-semibold text-center mb-2">Customer Overview</h2><canvas id="churnOverviewChart"></canvas></div>
