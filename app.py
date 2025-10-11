@@ -216,41 +216,45 @@ def predict():
                 "explanation": sorted(explanation_list, key=lambda item: abs(item['value']), reverse=True)
             }
             
-            # --- NEW FEATURE: Discount Analysis ---
+            # --- NEW FEATURE: Discount Analysis with Suggested Discount ---
             discount_analysis = []
+            suggested_discount = None # Initialize variable to hold the final suggestion
+
             if initial_probability >= 0.5:
                 print("High churn risk detected. Starting discount analysis...")
                 original_premium = customer_data['curr_ann_amt']
                 
-                # Try discounts from 5% up to 30%
-                for discount_pct in range(5, 31, 5):
-                    # Create a copy of the customer data for simulation
+                # Try discounts from 1% up to 20% for finer granularity
+                for discount_pct in range(1, 21, 1):
                     sim_customer_data = customer_data.copy()
-                    
-                    # Apply the discount
                     discount_factor = 1 - (discount_pct / 100.0)
                     sim_customer_data['curr_ann_amt'] = original_premium * discount_factor
                     
-                    # Re-run the prediction with the new premium
                     x_sim_df = pd.DataFrame([sim_customer_data], columns=feature_names)
                     sim_probability = float(model.predict_proba(x_sim_df)[0][1])
                     
-                    # Store the results
+                    # Store every step of the analysis
                     discount_analysis.append({
                         'discount_pct': discount_pct,
                         'new_premium': round(sim_customer_data['curr_ann_amt'], 2),
                         'new_probability': sim_probability
                     })
                     
-                    # If the probability is now below the threshold, stop the analysis
-                    if sim_probability < 0.5:
-                        break
+                    # If we find the optimal discount, store it and stop
+                    if sim_probability < 0.5 and suggested_discount is None:
+                        suggested_discount = discount_pct
+                        # break # Exit the loop once the goal is met
+
+                # If the loop finishes and we never went below 50%, suggest the max discount
+                if suggested_discount is None:
+                    suggested_discount = 20
 
             # Package all data for the template
             prediction_data = {
                 "probability": initial_probability,
                 "explanation": explanation_json,
-                "discount_analysis": discount_analysis  # Add the new analysis results
+                "discount_analysis": discount_analysis,
+                "suggested_discount": suggested_discount # Add the final suggestion
             }
             
             print(f"Prediction data being sent to template: {prediction_data}")
