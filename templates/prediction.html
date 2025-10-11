@@ -13,15 +13,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* --- LIGHT GLASSMORPHISM REDESIGN --- */
-
         :root {
-            --color-primary: #4f46e5; /* Indigo */
-            --color-secondary: #ec4899; /* Pink */
-            --color-success: #10b981;  /* Emerald */
-            --color-warning: #f59e0b;  /* Amber */
-            --color-danger: #ef4444;   /* Red */
-            --color-info: #3b82f6;    /* Blue */
+            --color-primary: #4f46e5;
+            --color-secondary: #ec4899;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --color-info: #3b82f6;
         }
 
         body {
@@ -34,7 +32,6 @@
             min-height: 100vh;
         }
 
-        /* Base class for all glass elements */
         .glass-effect {
             background: rgba(255, 255, 255, 0.45);
             backdrop-filter: blur(10px);
@@ -107,11 +104,11 @@
                 </div>
             </div>
             <nav class="mt-8 px-4 sidebar-nav">
-                <a href="{{ url_for('index') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'index' %}active{% endif %}">
+                <a href="/" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                     <span>Dashboard</span>
                 </a>
-                <a href="{{ url_for('predict') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'predict' %}active{% endif %}">
+                <a href="/predict" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg active">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     <span>Prediction</span>
                 </a>
@@ -187,10 +184,16 @@
                         {% if prediction_data %}
                         <div class="grid grid-cols-1 gap-8">
                             <!-- Churn Score Gauge -->
-                            <div class="glass-effect p-8 flex flex-col items-center justify-center">
-                                <h2 class="text-xl font-semibold text-gray-800 mb-6">Churn Probability Score</h2>
-                                <div class="w-full max-w-xs">
-                                    <canvas id="churnGauge"></canvas>
+                            <div class="glass-effect p-8">
+                                <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">Churn Probability Score</h2>
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="relative" style="width: 350px; height: 250px;">
+                                        <canvas id="churnGauge"></canvas>
+                                    </div>
+                                    <div class="mt-6 text-center">
+                                        <p class="text-5xl font-bold" id="probabilityText">0%</p>
+                                        <p class="text-sm text-gray-600 mt-2" id="riskLabel">Risk Level</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -222,96 +225,158 @@
     </div>
 
     {% if prediction_data %}
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-gauge@0.3.0/dist/chartjs-gauge.min.js"></script>
     <script>
-        // --- Set Chart.js defaults for the new theme ---
+        // Set Chart.js defaults for the new theme
         Chart.defaults.color = 'rgba(51, 65, 85, 0.7)';
         Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.3)';
 
-        // Color palette
-        const colorPalette = {
-            primary: 'rgba(79, 70, 229, 0.8)',
-            secondary: 'rgba(236, 72, 153, 0.8)',
-            success: 'rgba(16, 185, 129, 0.8)',
-            warning: 'rgba(245, 158, 11, 0.8)',
-            danger: 'rgba(239, 68, 68, 0.8)',
-            info: 'rgba(59, 130, 246, 0.8)',
-        };
-
-        // --- GAUGE CHART ---
         const probability = {{ prediction_data.probability }};
-        const gaugeCtx = document.getElementById('churnGauge').getContext('2d');
-        new Chart(gaugeCtx, {
-            type: 'gauge',
+        const explanation_data = {{ prediction_data.explanation | tojson }};
+
+        // Function to get color based on probability (Green -> Yellow -> Red)
+        function getColorForProbability(prob) {
+            if (prob < 0.33) {
+                // Green zone
+                return `rgba(16, 185, 129, ${0.7 + prob * 0.3})`;
+            } else if (prob < 0.67) {
+                // Yellow/Orange zone
+                return `rgba(245, 158, 11, ${0.7 + (prob - 0.33) * 0.3})`;
+            } else {
+                // Red zone
+                return `rgba(239, 68, 68, ${0.7 + (prob - 0.67) * 0.3})`;
+            }
+        }
+
+        function getRiskLabel(prob) {
+            if (prob < 0.33) return 'Low Risk';
+            if (prob < 0.67) return 'Medium Risk';
+            return 'High Risk';
+        }
+
+        // SPEEDOMETER GAUGE CHART
+        const ctx = document.getElementById('churnGauge').getContext('2d');
+        
+        // Create gradient for the gauge background
+        const gaugeGradient = ctx.createLinearGradient(0, 0, 350, 0);
+        gaugeGradient.addColorStop(0, 'rgba(16, 185, 129, 0.8)');
+        gaugeGradient.addColorStop(0.5, 'rgba(245, 158, 11, 0.8)');
+        gaugeGradient.addColorStop(1, 'rgba(239, 68, 68, 0.8)');
+
+        const gaugeChart = new Chart(ctx, {
+            type: 'doughnut',
             data: {
                 datasets: [{
-                    value: probability * 100,
-                    data: [25, 50, 75, 100],
-                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#b91c1c'],
+                    data: [probability * 100, (1 - probability) * 100],
+                    backgroundColor: [
+                        getColorForProbability(probability),
+                        'rgba(226, 232, 240, 0.3)'
+                    ],
+                    borderWidth: 0,
+                    circumference: 180,
+                    rotation: 270,
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                needle: { radiusPercentage: 2, widthPercentage: 3, lengthPercentage: 80, color: 'rgba(51, 65, 85, 0.9)' },
-                valueLabel: {
-                    display: true,
-                    formatter: (value) => `${value.toFixed(1)}%`,
-                    color: 'rgba(51, 65, 85, 1)',
-                    backgroundColor: 'rgba(255, 255, 255, 0)',
-                    borderRadius: 5,
-                    padding: { top: 10 },
-                    fontSize: 28
-                }
+                aspectRatio: 2,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: false
+                    }
+                },
+                cutout: '75%'
             }
         });
 
-        // --- WATERFALL CHART (SHAP EXPLANATION) ---
-        const explanationData = {{ prediction_data.explanation | tojson }};
+        // Update probability text and risk label
+        document.getElementById('probabilityText').textContent = (probability * 100).toFixed(1) + '%';
+        document.getElementById('probabilityText').style.color = getColorForProbability(probability);
+        document.getElementById('riskLabel').textContent = getRiskLabel(probability);
+
+        // SHAP WATERFALL CHART
         const shapCtx = document.getElementById('shapWaterfall').getContext('2d');
         
-        let runningTotal = explanationData.base_value;
-        const dataPoints = explanationData.explanation.map(item => {
-            const start = runningTotal;
-            const end = runningTotal + item.value;
-            runningTotal = end;
-            return { start, end };
-        });
+        // Prepare data for waterfall chart
+        const features = explanation_data.explanation.map(item => item.feature);
+        const values = explanation_data.explanation.map(item => item.value);
+        const baseValue = explanation_data.base_value;
+        
+        // Create cumulative values for waterfall effect
+        let cumulative = baseValue;
+        const cumulativeValues = [baseValue];
+        
+        for (let i = 0; i < values.length; i++) {
+            cumulative += values[i];
+            cumulativeValues.push(cumulative);
+        }
 
-        const finalScore = runningTotal;
+        // Colors for positive and negative contributions
+        const barColors = values.map(val => 
+            val > 0 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(16, 185, 129, 0.7)'
+        );
 
-        const labels = explanationData.explanation.map(item => `${item.feature}`);
-        const data = {
-            labels: ['Base', ...labels, 'Final Score'],
-            datasets: [{
-                data: [
-                    [0, explanationData.base_value],
-                    ...dataPoints.map(p => [p.start, p.end]),
-                    [0, finalScore]
-                ],
-                backgroundColor: (ctx) => {
-                    if (ctx.dataIndex === 0 || ctx.dataIndex === data.labels.length - 1) return 'rgba(59, 130, 246, 0.8)'; // Blue for base/final
-                    const value = explanationData.explanation[ctx.dataIndex - 1].value;
-                    return value > 0 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(16, 185, 129, 0.8)'; // Red for increase, Green for decrease
-                },
-                barPercentage: 0.9,
-                borderRadius: 4
-            }]
-        };
-
-        new Chart(shapCtx, {
+        const shapChart = new Chart(shapCtx, {
             type: 'bar',
-            data: data,
+            data: {
+                labels: ['Base', ...features],
+                datasets: [{
+                    label: 'SHAP Value',
+                    data: [baseValue, ...values],
+                    backgroundColor: ['rgba(59, 130, 246, 0.7)', ...barColors],
+                    borderColor: ['rgba(59, 130, 246, 1)', ...barColors.map(c => c.replace('0.7', '1'))],
+                    borderWidth: 2,
+                    borderRadius: 4
+                }]
+            },
             options: {
                 indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#1f2937',
+                        bodyColor: '#1f2937',
+                        borderColor: 'rgba(0, 0, 0, 0.1)',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed.x;
+                                return `Impact: ${value > 0 ? '+' : ''}${value.toFixed(4)}`;
+                            }
+                        }
+                    }
+                },
                 scales: {
-                    y: { grid: { display: false } },
                     x: {
-                        title: { display: true, text: 'Impact on Churn Probability', color: 'rgba(51, 65, 85, 0.7)' },
-                        beginAtZero: false
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
+                        }
                     }
                 }
             }

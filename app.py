@@ -6,6 +6,20 @@ import folium
 from folium.plugins import HeatMap
 import random
 
+import joblib
+import shap
+
+# --- Add this section to load the model and explainers once when the app starts ---
+# This is much more efficient than loading them on every request.
+try:
+    model = joblib.load('logistic_regression_model.pkl')
+    marital_status_encoder = joblib.load('marital_status_encoder.pkl')
+    explainer = joblib.load('shap_explainer.pkl')
+    print("Model, encoder, and SHAP explainer loaded successfully.")
+except FileNotFoundError:
+    print("Error: Model or helper files not found. Please run the notebook to generate them.")
+    model, marital_status_encoder, explainer = None, None, None
+
 # Initialize the Flask application
 app = Flask(__name__)
 
@@ -15,10 +29,10 @@ def load_and_prepare_data():
     """
     try:
         # Load the datasets
-        df_customer = pd.read_csv('../dataset/archive/customer.csv',engine="pyarrow")
-        df_address = pd.read_csv('../dataset/archive/address.csv',engine="pyarrow")
-        df_termination = pd.read_csv('../dataset/archive/termination.csv',engine="pyarrow")
-        df_demographic = pd.read_csv('../dataset/archive/demographic.csv',engine="pyarrow")
+        df_customer = pd.read_csv('./dataset/archive/customer.csv',engine="pyarrow")
+        df_address = pd.read_csv('./dataset/archive/address.csv',engine="pyarrow")
+        df_termination = pd.read_csv('./dataset/archive/termination.csv',engine="pyarrow")
+        df_demographic = pd.read_csv('./dataset/archive/demographic.csv',engine="pyarrow")
 
         # Merge the dataframes
         df = pd.merge(df_customer, df_address, on='ADDRESS_ID')
@@ -235,27 +249,65 @@ def index():
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
     """Handles the individual customer prediction page."""
-    prediction_data = None
     if request.method == 'POST':
-        # 1. Get data from the form
+        if not all([model, marital_status_encoder, explainer]):
+            return "Error: Model components not loaded. Cannot make predictions.", 500
+
+ 
+        # 1. Get and correctly encode data from the form
+        marital_status_str = request.form['marital_status']
+        marital_status_encoded = marital_status_encoder.transform([marital_status_str])[0]
+
         customer_data = {
-            'CURR_ANN_AMT': float(request.form['annual_premium']),
-            'DAYS_TENURE': int(request.form['tenure']),
-            'INCOME': float(request.form['income']),
-            'AGE_IN_YEARS': int(request.form['age']),
-            'GOOD_CREDIT': request.form.get('good_credit') == 'on'
-        }
-        
-        # 2. Get simulated prediction and explanation
-        probability = predict_churn_probability(customer_data)
-        explanation = get_shap_explanation(customer_data)
-        
-        prediction_data = {
-            "probability": probability,
-            "explanation": explanation
+            'curr_ann_amt': float(request.form['annual_premium']),
+            'days_tenure': int(request.form['tenure']),
+            'age_in_years': int(request.form['age']),
+            'income': float(request.form['income']),
+            'has_children': 1 if request.form.get('has_children') == 'on' else 0,
+            'marital_status': marital_status_encoded,
+            'home_owner': int(request.form['home_owner']),
+            'good_credit': 1 if request.form.get('good_credit') == 'on' else 0,
         }
 
-    return render_template('prediction.html', prediction_data=prediction_data)
+        # 2. Create a pandas DataFrame to preserve feature names for the model and explainer
+        feature_names = [
+            'curr_ann_amt', 'days_tenure', 'age_in_years', 'income',
+            'has_children', 'marital_status', 'home_owner', 'good_credit'
+        ]
+        x_df = pd.DataFrame([customer_data], columns=feature_names)
+
+        # 3. Get the prediction probability
+        # The result is a NumPy float, so we immediately convert it
+        probability = float(model.predict_proba(x_df)[0][1])
+
+        # 4. Get the SHAP explanation for this single prediction
+        shap_values = explainer(x_df)
+
+        # 5. Format the explanation for the waterfall chart, converting all values
+        explanation_list = []
+        for i, feature in enumerate(feature_names):
+            explanation_list.append({
+                "feature": feature.replace('_', ' ').title(),
+                # CRITICAL FIX: Convert NumPy float to standard Python float
+                "value": float(shap_values.values[0][i])
+            })
+
+        explanation_json = {
+            # CRITICAL FIX: Convert NumPy float to standard Python float
+            "base_value": float(shap_values.base_values[0]),
+            "explanation": sorted(explanation_list, key=lambda item: abs(item['value']), reverse=True)
+        }
+        
+        # 6. Package all data for the template, now using web-safe types
+        pred_data = {
+            "probability": probability,
+            "explanation": explanation_json
+        }
+        print(f"Prediction data being sent to template: {pred_data}")
+        return render_template('prediction.html', prediction_data=pred_data)
+    else:
+        return render_template('prediction.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
