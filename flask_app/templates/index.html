@@ -111,15 +111,10 @@
 
             <!-- NEW: Correlation Heatmap -->
             <div class="chart-container pb-16 lg:col-span-2">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Feature Correlation Heatmap</h2>
-                <canvas id="correlationHeatmap"></canvas>
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Geospatial Churn Hotspots</h2>
+                {{ churn_map_html | safe }}
             </div>
             
-            <!-- NEW: Geospatial Churn Map -->
-            <div class="chart-container pb-16 lg:col-span-2">
-                 <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Geospatial Churn Hotspots</h2>
-                <div id="churnMap"></div>
-            </div>
         </div>
     </div>
 

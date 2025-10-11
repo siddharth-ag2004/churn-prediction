@@ -2,6 +2,8 @@ import pandas as pd
 from flask import Flask, render_template, jsonify
 import json
 import numpy as np
+import folium
+from folium.plugins import HeatMap
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -42,6 +44,47 @@ def load_and_prepare_data():
     except FileNotFoundError:
         print("Error: One or more dataset files not found.")
         return pd.DataFrame()
+
+def generate_churn_heatmap(df, sample_size=5000):
+    """
+    Generates a folium HeatMap showing churned vs retained customers.
+    Returns the HTML representation of the map.
+    """
+    # Drop rows without lat/lon
+    df = df.dropna(subset=['LATITUDE', 'LONGITUDE'])
+    if len(df) > sample_size:
+        df = df.sample(n=sample_size, random_state=42)
+
+    df_stayed = df[df['CHURN'] == 0]
+    df_left = df[df['CHURN'] == 1]
+
+    # Base map — zoomed in more
+    m = folium.Map(
+        location=[df['LATITUDE'].mean(), df['LONGITUDE'].mean()],
+        zoom_start=11,
+        tiles='OpenStreetMap'
+    )
+
+    # HeatMap for customers who stayed
+    HeatMap(
+        df_stayed[['LATITUDE', 'LONGITUDE']],
+        radius=8,
+        blur=12,
+        gradient={0.2: 'green', 0.8: 'lime'},
+        min_opacity=0.5
+    ).add_to(m)
+
+    # HeatMap for customers who left
+    HeatMap(
+        df_left[['LATITUDE', 'LONGITUDE']],
+        radius=8,
+        blur=10,
+        gradient={0.2: 'yellow', 0.8: 'red'},
+        min_opacity=0.5
+    ).add_to(m)
+
+    return m._repr_html_()
+
 
 # Load the data once when the app starts
 df = load_and_prepare_data()
@@ -132,13 +175,8 @@ def index():
             heatmap_data.append({'x': col1, 'y': col2, 'v': round(corr_matrix.iloc[i, j], 2)})
     heatmap_labels = corr_matrix.columns.tolist()
 
-    # 10. NEW Map: Geospatial Churn Analysis
-    churn_by_state = df.groupby('STATE')['CHURN'].agg(['mean', 'count']).reset_index()
-    churn_by_state.rename(columns={'mean': 'churn_rate'}, inplace=True)
-    coords = df.groupby('STATE')[['LATITUDE', 'LONGITUDE']].mean().reset_index()
-    map_data = pd.merge(churn_by_state, coords, on='STATE')
-    map_data.dropna(subset=['LATITUDE', 'LONGITUDE', 'churn_rate'], inplace=True)
-    map_data_json = map_data.to_dict(orient='records')
+    # 10. Folium Heatmap
+    churn_map_html = generate_churn_heatmap(df)
 
     # Pass all data to the template
     return render_template(
@@ -151,12 +189,11 @@ def index():
         churn_by_premium_data=json.dumps(churn_by_premium_data),
         churn_by_credit_pie_data=json.dumps(churn_by_credit_pie_data),
         churn_by_marital_pie_data=json.dumps(churn_by_marital_pie_data),
-        # New data
         churn_by_tenure_data=json.dumps(churn_by_tenure_data),
         churn_by_owner_data=json.dumps(churn_by_owner_pie_data),
         heatmap_data=json.dumps(heatmap_data),
         heatmap_labels=json.dumps(heatmap_labels),
-        map_data=json.dumps(map_data_json)
+        churn_map_html=churn_map_html  # <-- pass Folium map HTML
     )
 
 if __name__ == '__main__':
