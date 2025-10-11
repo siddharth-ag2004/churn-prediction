@@ -172,42 +172,94 @@ def index():
 # ==============================================================================
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
-    """Handles the individual customer prediction page."""
+    """Handles the individual customer prediction page and discount analysis."""
+    prediction_data = None
     if request.method == 'POST':
         if not all([model, marital_status_encoder, explainer]):
             return "Error: Model components not loaded. Cannot make predictions.", 500
-        
-        marital_status_str = request.form['marital_status']
-        marital_status_encoded = marital_status_encoder.transform([marital_status_str])[0]
 
-        customer_data = {
-            'curr_ann_amt': float(request.form['annual_premium']), 'days_tenure': int(request.form['tenure']),
-            'age_in_years': int(request.form['age']), 'income': float(request.form['income']),
-            'has_children': 1 if request.form.get('has_children') == 'on' else 0,
-            'marital_status': marital_status_encoded, 'home_owner': int(request.form['home_owner']),
-            'good_credit': 1 if request.form.get('good_credit') == 'on' else 0,
-        }
-        
-        feature_names = ['curr_ann_amt', 'days_tenure', 'age_in_years', 'income', 'has_children', 'marital_status', 'home_owner', 'good_credit']
-        x_df = pd.DataFrame([customer_data], columns=feature_names)
+        try:
+            # 1. Get and correctly encode data from the form
+            marital_status_str = request.form['marital_status']
+            marital_status_encoded = marital_status_encoder.transform([marital_status_str])[0]
 
-        probability = float(model.predict_proba(x_df)[0][1])
-        shap_values = explainer(x_df)
-        
-        explanation_list = [
-            {"feature": feature.replace('_', ' ').title(), "value": float(shap_values.values[0][i])}
-            for i, feature in enumerate(feature_names)
-        ]
+            customer_data = {
+                'curr_ann_amt': float(request.form['annual_premium']),
+                'days_tenure': int(request.form['tenure']),
+                'age_in_years': int(request.form['age']),
+                'income': float(request.form['income']),
+                'has_children': 1 if request.form.get('has_children') == 'on' else 0,
+                'marital_status': marital_status_encoded,
+                'home_owner': int(request.form['home_owner']),
+                'good_credit': 1 if request.form.get('good_credit') == 'on' else 0,
+            }
 
-        explanation_json = {
-            "base_value": float(shap_values.base_values[0]),
-            "explanation": sorted(explanation_list, key=lambda item: abs(item['value']), reverse=True)
-        }
-        
-        pred_data = {"probability": probability, "explanation": explanation_json}
-        return render_template('prediction.html', prediction_data=pred_data)
-    else:
-        return render_template('prediction.html')
+            feature_names = [
+                'curr_ann_amt', 'days_tenure', 'age_in_years', 'income',
+                'has_children', 'marital_status', 'home_owner', 'good_credit'
+            ]
+            
+            # --- Initial Prediction ---
+            x_df = pd.DataFrame([customer_data], columns=feature_names)
+            initial_probability = float(model.predict_proba(x_df)[0][1])
+            shap_values = explainer(x_df)
+            
+            explanation_list = []
+            for i, feature in enumerate(feature_names):
+                explanation_list.append({
+                    "feature": feature.replace('_', ' ').title(),
+                    "value": float(shap_values.values[0][i])
+                })
+
+            explanation_json = {
+                "base_value": float(shap_values.base_values[0]),
+                "explanation": sorted(explanation_list, key=lambda item: abs(item['value']), reverse=True)
+            }
+            
+            # --- NEW FEATURE: Discount Analysis ---
+            discount_analysis = []
+            if initial_probability >= 0.5:
+                print("High churn risk detected. Starting discount analysis...")
+                original_premium = customer_data['curr_ann_amt']
+                
+                # Try discounts from 5% up to 30%
+                for discount_pct in range(5, 31, 5):
+                    # Create a copy of the customer data for simulation
+                    sim_customer_data = customer_data.copy()
+                    
+                    # Apply the discount
+                    discount_factor = 1 - (discount_pct / 100.0)
+                    sim_customer_data['curr_ann_amt'] = original_premium * discount_factor
+                    
+                    # Re-run the prediction with the new premium
+                    x_sim_df = pd.DataFrame([sim_customer_data], columns=feature_names)
+                    sim_probability = float(model.predict_proba(x_sim_df)[0][1])
+                    
+                    # Store the results
+                    discount_analysis.append({
+                        'discount_pct': discount_pct,
+                        'new_premium': round(sim_customer_data['curr_ann_amt'], 2),
+                        'new_probability': sim_probability
+                    })
+                    
+                    # If the probability is now below the threshold, stop the analysis
+                    if sim_probability < 0.5:
+                        break
+
+            # Package all data for the template
+            prediction_data = {
+                "probability": initial_probability,
+                "explanation": explanation_json,
+                "discount_analysis": discount_analysis  # Add the new analysis results
+            }
+            
+            print(f"Prediction data being sent to template: {prediction_data}")
+
+        except Exception as e:
+            print(f"An error occurred during prediction: {e}")
+            return f"An error occurred: {e}", 400
+
+    return render_template('prediction.html', prediction_data=prediction_data)
 
 
 # ==============================================================================
