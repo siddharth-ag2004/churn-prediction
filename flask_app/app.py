@@ -12,10 +12,10 @@ def load_and_prepare_data():
     """
     try:
         # Load the datasets
-        df_customer = pd.read_csv('../customer.csv')
-        df_address = pd.read_csv('../address.csv')
-        df_termination = pd.read_csv('../termination.csv')
-        df_demographic = pd.read_csv('../demographic.csv')
+        df_customer = pd.read_csv('../dataset/archive/customer.csv')
+        df_address = pd.read_csv('../dataset/archive/address.csv')
+        df_termination = pd.read_csv('../dataset/archive/termination.csv')
+        df_demographic = pd.read_csv('../dataset/archive/demographic.csv')
 
         # Merge the dataframes
         df = pd.merge(df_customer, df_address, on='ADDRESS_ID')
