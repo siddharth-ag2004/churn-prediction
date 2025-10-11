@@ -61,7 +61,7 @@ def generate_churn_heatmap(df, sample_size=5000):
     # Base map — zoomed in more
     m = folium.Map(
         location=[df['LATITUDE'].mean(), df['LONGITUDE'].mean()],
-        zoom_start=11,
+        zoom_start=10,
         tiles='OpenStreetMap'
     )
 
