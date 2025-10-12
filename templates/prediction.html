@@ -182,7 +182,6 @@
     </div>
 </div>
 
-
                     <!-- Results Column -->
                     <div class="lg:col-span-2">
                         {% if prediction_data %}
@@ -209,11 +208,26 @@
                                 </div>
                             </div>
 
-                            <!-- Discount Analysis -->
+                            <!-- Discount Analysis Chart -->
                             <div class="glass-effect p-8">
                                 <h2 class="text-xl font-semibold text-gray-800 mb-6">Discount Impact Analysis</h2>
                                 <div style="height: 400px;">
                                     <canvas id="discountChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Premium Comparison Card -->
+                            <div class="glass-effect p-6">
+                                <h2 class="text-lg font-semibold text-gray-800 mb-4">Premium Comparison</h2>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-white bg-opacity-50 p-4 rounded-lg text-center">
+                                        <p class="text-sm text-gray-600 mb-2">Current Premium</p>
+                                        <p class="text-2xl font-bold text-gray-800" id="currentPremiumDisplay">$0</p>
+                                    </div>
+                                    <div class="bg-green-50 bg-opacity-70 p-4 rounded-lg text-center border border-green-200">
+                                        <p class="text-sm text-green-700 font-medium mb-2">Discounted Premium</p>
+                                        <p class="text-2xl font-bold text-green-600" id="discountedPremiumDisplay">$0</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -400,7 +414,11 @@
         
         // Get current premium from form input
         const currentPremium = parseFloat(document.getElementById('annual_premium').value);
-        
+        const discount_to_provide = {{ prediction_data.suggested_discount | tojson }};
+        const discountedPremium = currentPremium * (1 - (discount_to_provide / 100));
+
+        document.getElementById('currentPremiumDisplay').textContent = '$' + currentPremium.toFixed(2);
+        document.getElementById('discountedPremiumDisplay').textContent = '$' + discountedPremium.toFixed(2);
         // Prepare data
         const discountLabels = ['Current', ...discountData.map(d => `${d.discount_pct}% Off`)];
         const discountProbabilities = [probability * 100, ...discountData.map(d => d.new_probability * 100)];
