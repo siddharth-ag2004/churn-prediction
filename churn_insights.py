@@ -69,7 +69,7 @@ def analyze_with_gemini(api_key, articles, peak_dates):
     - Recent insurance-related news articles
 
     Your task:
-    🔹 For each churn spike date, check if any nearby news (within ~5–10 days) might explain the spike.
+    🔹 For each churn spike date, check if any news published within the 5–10 days before that date might explain the spike. Do not use news published after the churn spike date.
     🔹 Output concise, dashboard-friendly insights such as:
        "High churn around early October could likely be explained by news on 2025-10-06 about proposed FAIR Plan rate hikes in California — (https://example.com)"
     🔹 Always include the article's publication date and its URL in parentheses at the end.

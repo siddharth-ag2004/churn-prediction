@@ -126,9 +126,19 @@
         }
 
         .insights-content strong {
-            color: #1e293b;
-            font-weight: 600;
+            font-weight: bold;
         }
+
+        #insightsContainer a.insight-link {
+            color: #1d4ed8;
+            text-decoration: underline;
+            font-weight: normal;
+        }
+
+        #insightsContainer a.insight-link:hover {
+            color: #2563eb;
+        }
+
 
         .selected-points-badge {
             display: inline-flex;
@@ -426,25 +436,63 @@
         }
 
         function displayInsights(data) {
-            const container = document.getElementById('insightsContainer');
-            
-            let html = `
-                <div class="insights-title">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                    Insights Generated
-                    <span class="selected-points-badge ml-auto">
-                        ${selectedDates.length} ${selectedDates.length === 1 ? 'date' : 'dates'} selected
-                    </span>
-                </div>
-                <div class="insights-content">
-                    ${data.analysis}
-                </div>
-            `;
-            
-            container.innerHTML = html;
+    const container = document.getElementById('insightsContainer');
+
+    // Split AI output by lines
+    const lines = data.analysis.split('\n');
+
+    // Process lines into HTML
+    let htmlLines = lines.map(line => {
+        line = line.trim();
+        if (!line) return ''; // skip empty lines
+
+        // Convert Markdown bold (**text**) to <strong>
+        line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // Convert backticks `text` to <strong>text</strong>
+        line = line.replace(/`(.*?)`/g, '<strong>$1</strong>');
+
+        // Convert URLs at the end (after — or space) into clickable links
+        const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
+        if (urlMatch) {
+            const url = urlMatch[1];
+            line = line.replace(url, `<a href="${url}" target="_blank" class="insight-link">${url}</a>`);
         }
+
+        // Remove extra dashes if present
+        line = line.replace(/—\s*—/g, '—');
+
+        // Wrap lines starting with "*" as <li>
+        if (line.startsWith('* ')) {
+            return `<li>${line.slice(2)}</li>`;
+        }
+
+        return line;
+    });
+
+    // Wrap list items in <ul>
+    const formattedAnalysis = `<ul>${htmlLines.join('')}</ul>`;
+
+    let html = `
+        <div class="insights-title">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Insights Generated
+            <span class="selected-points-badge ml-auto">
+                ${selectedDates.length} ${selectedDates.length === 1 ? 'date' : 'dates'} selected
+            </span>
+        </div>
+        <div class="insights-content">
+            ${formattedAnalysis}
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+
+
 
         function showEmptyState() {
             const container = document.getElementById('insightsContainer');
