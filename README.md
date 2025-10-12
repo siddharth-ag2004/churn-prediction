@@ -52,6 +52,12 @@ pip install -r requirements.txt
 python app.py
 ```
 
+## Features:
+- Customer Churn Prediction
+- Proactive Retention Email Generation
+- Interactive Dashboard with Visualizations
+- Insights and Recommendations using news articles
+
 ## Video Link:
 https://drive.google.com/file/d/1EyoNU0Z9q8Gltf6HUcFt5sdvV8bmM2TI/view?usp=sharing
 
