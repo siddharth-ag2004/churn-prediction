@@ -94,7 +94,7 @@ def generate_churn_heatmap(df, sample_size=5000):
  
     HeatMap(df_stayed[['LATITUDE', 'LONGITUDE']], radius=8, blur=12, gradient={0.2: 'green', 0.8: 'lime'}, min_opacity=0.5).add_to(fg_stayed)
     HeatMap(df_left[['LATITUDE', 'LONGITUDE']], radius=8, blur=10, gradient={0.2: 'yellow', 0.8: 'red'}, min_opacity=0.5).add_to(fg_left)
-    HeatMap(df_high_value[['LATITUDE', 'LONGITUDE']], radius=3, blur=8, gradient={0.2: 'blue', 0.8: 'cyan'}, min_opacity=0.6).add_to(fg_high)
+    HeatMap(df_high_value[['LATITUDE', 'LONGITUDE']], radius=3, blur=5, gradient={0.2: 'blue', 0.8: 'cyan'}, min_opacity=0.6).add_to(fg_high)
  
     fg_stayed.add_to(m)
     fg_left.add_to(m)
@@ -253,9 +253,9 @@ def predict():
                     'new_premium': round(sim_customer_data['curr_ann_amt'], 2),
                     'new_probability': sim_probability
                 })
-                # if sim_probability < 0.5 and suggested_discount is None:
-                #     suggested_discount = discount_pct
-                #     break
+                if sim_probability < 0.5 and suggested_discount is None:
+                    suggested_discount = discount_pct
+                    break
             if suggested_discount is None:
                 suggested_discount = 20
 
