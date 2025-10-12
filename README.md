@@ -53,10 +53,21 @@ python app.py
 ```
 
 ## Features:
-- Customer Churn Prediction
-- Proactive Retention Email Generation
-- Interactive Dashboard with Visualizations
-- Insights and Recommendations using news articles
+⁠ Project Features
+
+- AI-Powered Churn Prediction: Utilizes a trained Logistic Regression model to accurately predict the probability of a customer churning based on their demographic and policy data.
+
+- Explainable AI (XAI) Insights: Integrates SHAP (SHapley Additive exPlanations) to generate a clear, intuitive waterfall chart. This explains why a prediction was made by showing the positive and negative impact of each customer feature.
+
+- Interactive "What-If" Analysis: Includes a dynamic Discount Impact Analysis chart. For high-risk customers, it simulates the effect of various premium discounts, showing how each reduction lowers the churn probability.
+
+- Prescriptive Retention Strategy: Automatically identifies and highlights the optimal discount percentage required to bring a high-risk customer's churn probability below the 50% threshold, providing a clear, actionable retention step.
+
+- Automated Communication: Features a "Draft Email" button that generates a personalized retention email with the suggested discount, ready to be sent to the at-risk customer.
+
+- Comprehensive Dashboard: Presents a high-level overview of churn analytics, including breakdowns by tenure, premium, income, and demographics, as well as a geospatial heatmap of churn hotspots.
+
+- External Event Correlation: An "Insights" page connects real-world news events (fetched via a news API and analyzed by Gemini) to spikes in the historical churn rate, providing context for market-wide trends. 
 
 ## Video Link:
 https://drive.google.com/file/d/1EyoNU0Z9q8Gltf6HUcFt5sdvV8bmM2TI/view?usp=sharing
