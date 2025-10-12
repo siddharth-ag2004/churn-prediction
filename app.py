@@ -241,23 +241,23 @@ def predict():
             # ... (discount analysis logic is unchanged) ...
             discount_analysis = []
             suggested_discount = None
-            if probability >= 0.5:
-                original_premium = customer_data['curr_ann_amt']
-                for discount_pct in range(1, 21, 1):
-                    sim_customer_data = customer_data.copy()
-                    sim_customer_data['curr_ann_amt'] = original_premium * (1 - (discount_pct / 100.0))
-                    x_sim_df = pd.DataFrame([sim_customer_data], columns=feature_names)
-                    sim_probability = float(model.predict_proba(x_sim_df)[0][1])
-                    discount_analysis.append({
-                        'discount_pct': discount_pct,
-                        'new_premium': round(sim_customer_data['curr_ann_amt'], 2),
-                        'new_probability': sim_probability
-                    })
-                    if sim_probability < 0.5 and suggested_discount is None:
-                        suggested_discount = discount_pct
-                        break
-                if suggested_discount is None:
-                    suggested_discount = 20
+            # if probability >= 0.5:
+            original_premium = customer_data['curr_ann_amt']
+            for discount_pct in range(1, 16, 1):
+                sim_customer_data = customer_data.copy()
+                sim_customer_data['curr_ann_amt'] = original_premium * (1 - (discount_pct / 100.0))
+                x_sim_df = pd.DataFrame([sim_customer_data], columns=feature_names)
+                sim_probability = float(model.predict_proba(x_sim_df)[0][1])
+                discount_analysis.append({
+                    'discount_pct': discount_pct,
+                    'new_premium': round(sim_customer_data['curr_ann_amt'], 2),
+                    'new_probability': sim_probability
+                })
+                # if sim_probability < 0.5 and suggested_discount is None:
+                #     suggested_discount = discount_pct
+                #     break
+            if suggested_discount is None:
+                suggested_discount = 20
 
             # Package all data for the template
             prediction_data = {
