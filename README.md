@@ -46,6 +46,7 @@ pip install -r requirements.txt
 
 **GEMINI_API_KEY**="YOUR_GEMINI_API_KEY"
 **MEDIASTACK_API_KEY**="YOUR_MEDIASTACK_API_KEY"
+in .env file
 
 ### 5. Run the Application
 ```bash
