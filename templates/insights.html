@@ -335,15 +335,6 @@
                                 font: { size: 12, weight: 600 }
                             }
                         },
-                        tooltip: {
-                            callbacks: {
-                                afterLabel: function(context) {
-                                    const date = context.label;
-                                    const event = newsEvents.find(e => e.date === date);
-                                    return event ? `\n📰 ${event.headline}` : '';
-                                }
-                            }
-                        }
                     },
                     scales: {
                         y: {
