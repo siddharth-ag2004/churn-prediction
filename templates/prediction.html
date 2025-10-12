@@ -136,6 +136,15 @@
         <form action="/predict" method="POST">
             <div class="space-y-5">
                 <div>
+                    <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-2">Customer Name(s)</label>
+                    <input type="text" id="customer_name" name="customer_name" 
+                           class="w-full px-4 py-2 rounded-lg shadow-sm" 
+                           placeholder="John Doe" 
+                           value="{{ form_data.customer_name if form_data.customer_name else 'John Doe' }}" 
+                           required>
+                    <p class="text-xs text-gray-500 mt-1">Separate multiple names with commas.</p>
+                </div>                                        
+                <div>
                     <label for="tenure" class="block text-sm font-medium text-gray-700 mb-2">Days of Tenure</label>
                     <input type="number" id="tenure" name="tenure" class="w-full px-4 py-2 rounded-lg shadow-sm" value="{{ form_data.tenure }}" required>
                 </div>
@@ -220,9 +229,9 @@
                             <div class="glass-effect p-6">
                                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Premium Comparison</h2>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <div class="bg-white bg-opacity-50 p-4 rounded-lg text-center">
-                                        <p class="text-sm text-gray-600 mb-2">Current Premium</p>
-                                        <p class="text-2xl font-bold text-gray-800" id="currentPremiumDisplay">$0</p>
+                                    <div class="bg-red-50 bg-opacity-70 p-4 rounded-lg text-center border border-red-200">
+                                        <p class="text-sm text-red-600 mb-2">Current Premium</p>
+                                        <p class="text-2xl font-bold text-red-800" id="currentPremiumDisplay">$0</p>
                                     </div>
                                     <div class="bg-green-50 bg-opacity-70 p-4 rounded-lg text-center border border-green-200">
                                         <p class="text-sm text-green-700 font-medium mb-2">Discounted Premium</p>
@@ -230,6 +239,14 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="mt-4 flex justify-center">
+                                <button id="draftEmailBtn" class="py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition">
+                                    Draft Email
+                                </button>
+                            </div>
+                                                 
+
                         </div>
                         {% else %}
                         <div class="glass-effect p-8 flex items-center justify-center h-full">
@@ -572,6 +589,38 @@
                 }
             }
         });
+
+        document.getElementById('draftEmailBtn').addEventListener('click', () => {
+            // Get the names from the input field
+            const namesInput = document.getElementById('customer_name').value;
+            if (!namesInput) {
+                alert("Please enter customer name(s) first.");
+                return;
+            }
+
+            // Split names by commas and generate emails
+            const emails = namesInput.split(',')
+                .map(name => {
+                    // Trim whitespace and convert spaces to dots
+                    return name.trim().toLowerCase().replace(/\s+/g, '.') + "@email.com";
+                });
+
+            // Use the predicted discount from your JS variable
+            const discount = {{ prediction_data.suggested_discount | tojson }};
+
+            // Open mail client for each email (one by one via comma-separated in mailto)
+            const mailto = `mailto:${emails.join(',')}`
+                        + `?subject=${encodeURIComponent("Exclusive Offer Just for You")}`
+                        + `&body=${encodeURIComponent(
+                            `Dear Customer,\n\nWe greatly value you as a customer at Chubb Insurance and want to ensure you continue to enjoy the best coverage possible.\n\nAs a token of our appreciation, we’re excited to offer you an exclusive ${discount}% discount on your policy.\n\nIf you’d like to take advantage of this offer or discuss your policy options, please reach out to our customer service team at support@chubb.com or call us at 1-800-CHUBB-CARE.\n\nThank you for being a valued part of the Chubb family.\n\nWarm regards,\nThe Chubb Customer Experience Team\nChubb Insurance\nhttps://www.chubb.com`
+                        )}`;
+
+            // Redirect to open mail client
+            window.location.href = mailto;
+        });
+
+
+
 
         
     </script>

@@ -7,6 +7,9 @@ from folium.plugins import HeatMap
 import random
 from datetime import datetime, timedelta # New import
 from churn_insights import generate_churn_insights
+from urllib.parse import quote
+from flask import redirect, request
+from email_draft import generate_retention_email
 
 import joblib
 import shap
@@ -350,6 +353,29 @@ def get_insights():
     print(f"Generated analysis for dates {selected_dates}: {analysis_text}")
     
     return jsonify({'analysis': analysis_text})
+
+@app.route('/generate_email_draft')
+def generate_email_draft():
+    # Get customer name from query params
+    customer_name = request.args.get("name", "Valued Customer")
+    
+    # Get discount from query params (sent from JS using the prediction_data)
+    discount = int(request.args.get("discount", 10))
+    
+    # Generate email text
+    email_text = generate_retention_email(customer_name, discount)
+    
+    # Optional: set a subject line
+    subject_line = f"We're Sorry to See You Go, {customer_name} — A Special Offer from Us"
+    
+    # Encode for mailto
+    mailto_link = (
+        f"mailto:?subject={quote(subject_line)}"
+        f"&body={quote(email_text)}"
+    )
+    
+    # Redirect to mail client
+    return redirect(mailto_link)
 
 if __name__ == '__main__':
     app.run(debug=True)
