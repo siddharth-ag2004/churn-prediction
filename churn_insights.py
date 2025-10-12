@@ -50,7 +50,7 @@ def analyze_with_gemini(api_key, articles, peak_dates):
     Returns a text summary of insights.
     """
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.5-pro')
+    model = genai.GenerativeModel('gemini-2.5-flash-lite')
 
     news_text = ""
     for art in articles:
