@@ -23,7 +23,7 @@ def calculate_churn_probability(customer_data, min_max_vals):
         'income': -1.5,                     # Income provides stability
         'good_credit': -3.0,                # Good credit is a very strong loyalty factor
         'home_owner': -1.5,                 # Home ownership indicates stability
-        'has_children': 1.0                 # Children add a moderate amount of risk
+        'has_children': 0.05                 # Children add a moderate amount of risk
     }
 
     # --- Step 2: Min-Max Normalize Each Feature to a 0-1 Scale ---
@@ -64,7 +64,7 @@ def calculate_churn_probability(customer_data, min_max_vals):
 def main():
     ORIGINAL_FILENAME = './dataset/archive/autoinsurance_churn.csv'
     OUTPUT_FILENAME = 'formula_labeled_churn_data_final.csv'
-    PROBABILITY_THRESHOLD = 0.02
+    PROBABILITY_THRESHOLD = 0.01
 
     print("="*70)
     print("Dataset Re-labeling Pipeline (v3 - Linear Normalized)")
