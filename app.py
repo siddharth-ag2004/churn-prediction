@@ -172,98 +172,104 @@ def index():
 # ==============================================================================
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
-    """Handles the individual customer prediction page and discount analysis."""
+    """Handles the individual customer prediction page."""
+    
+    # Initialize form_data with default values for the initial GET request
+    form_data = {
+        'tenure': 500,
+        'annual_premium': 1200.50,
+        'income': 65000,
+        'age': 45,
+        'marital_status': 'Married',
+        'home_owner': '0',
+        'good_credit': 'on',
+        'has_children': None # None means it will be unchecked by default
+    }
+
     prediction_data = None
     if request.method == 'POST':
         if not all([model, marital_status_encoder, explainer]):
-            return "Error: Model components not loaded. Cannot make predictions.", 500
+            return "Error: Model components not loaded.", 500
 
         try:
-            # 1. Get and correctly encode data from the form
-            marital_status_str = request.form['marital_status']
+            # 1. Capture the raw form data to send back to the template
+            form_data = request.form.to_dict()
+
+            # 2. Process and predict as before
+            marital_status_str = form_data['marital_status']
             marital_status_encoded = marital_status_encoder.transform([marital_status_str])[0]
 
             customer_data = {
-                'curr_ann_amt': float(request.form['annual_premium']),
-                'days_tenure': int(request.form['tenure']),
-                'age_in_years': int(request.form['age']),
-                'income': float(request.form['income']),
-                'has_children': 1 if request.form.get('has_children') == 'on' else 0,
+                'curr_ann_amt': float(form_data['annual_premium']),
+                'days_tenure': int(form_data['tenure']),
+                'age_in_years': int(form_data['age']),
+                'income': float(form_data['income']),
+                'has_children': 1 if 'has_children' in form_data else 0,
                 'marital_status': marital_status_encoded,
-                'home_owner': int(request.form['home_owner']),
-                'good_credit': 1 if request.form.get('good_credit') == 'on' else 0,
+                'home_owner': int(form_data['home_owner']),
+                'good_credit': 1 if 'good_credit' in form_data else 0,
             }
 
+            # ... (rest of your prediction and SHAP logic is unchanged) ...
+
+            # Create DataFrame
             feature_names = [
                 'curr_ann_amt', 'days_tenure', 'age_in_years', 'income',
                 'has_children', 'marital_status', 'home_owner', 'good_credit'
             ]
-            
-            # --- Initial Prediction ---
             x_df = pd.DataFrame([customer_data], columns=feature_names)
-            initial_probability = float(model.predict_proba(x_df)[0][1])
+
+            # Get probability and explanation
+            probability = float(model.predict_proba(x_df)[0][1])
             shap_values = explainer(x_df)
             
+            # Format SHAP explanation
             explanation_list = []
             for i, feature in enumerate(feature_names):
                 explanation_list.append({
                     "feature": feature.replace('_', ' ').title(),
                     "value": float(shap_values.values[0][i])
                 })
-
             explanation_json = {
                 "base_value": float(shap_values.base_values[0]),
                 "explanation": sorted(explanation_list, key=lambda item: abs(item['value']), reverse=True)
             }
-            
-            # --- NEW FEATURE: Discount Analysis with Suggested Discount ---
-            discount_analysis = []
-            suggested_discount = None # Initialize variable to hold the final suggestion
 
-            if initial_probability >= 0.5:
-                print("High churn risk detected. Starting discount analysis...")
+            # ... (discount analysis logic is unchanged) ...
+            discount_analysis = []
+            suggested_discount = None
+            if probability >= 0.5:
                 original_premium = customer_data['curr_ann_amt']
-                
-                # Try discounts from 1% up to 20% for finer granularity
                 for discount_pct in range(1, 21, 1):
                     sim_customer_data = customer_data.copy()
-                    discount_factor = 1 - (discount_pct / 100.0)
-                    sim_customer_data['curr_ann_amt'] = original_premium * discount_factor
-                    
+                    sim_customer_data['curr_ann_amt'] = original_premium * (1 - (discount_pct / 100.0))
                     x_sim_df = pd.DataFrame([sim_customer_data], columns=feature_names)
                     sim_probability = float(model.predict_proba(x_sim_df)[0][1])
-                    
-                    # Store every step of the analysis
                     discount_analysis.append({
                         'discount_pct': discount_pct,
                         'new_premium': round(sim_customer_data['curr_ann_amt'], 2),
                         'new_probability': sim_probability
                     })
-                    
-                    # If we find the optimal discount, store it and stop
                     if sim_probability < 0.5 and suggested_discount is None:
                         suggested_discount = discount_pct
-                        # break # Exit the loop once the goal is met
-
-                # If the loop finishes and we never went below 50%, suggest the max discount
+                        break
                 if suggested_discount is None:
                     suggested_discount = 20
 
             # Package all data for the template
             prediction_data = {
-                "probability": initial_probability,
+                "probability": probability,
                 "explanation": explanation_json,
                 "discount_analysis": discount_analysis,
-                "suggested_discount": suggested_discount # Add the final suggestion
+                "suggested_discount": suggested_discount
             }
-            
-            print(f"Prediction data being sent to template: {prediction_data}")
 
         except Exception as e:
             print(f"An error occurred during prediction: {e}")
             return f"An error occurred: {e}", 400
 
-    return render_template('prediction.html', prediction_data=prediction_data)
+    # Pass BOTH prediction_data AND form_data to the template
+    return render_template('prediction.html', prediction_data=prediction_data, form_data=form_data)
 
 
 # ==============================================================================

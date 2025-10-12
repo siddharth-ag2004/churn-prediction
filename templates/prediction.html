@@ -104,17 +104,13 @@
                 </div>
             </div>
             <nav class="mt-8 px-4 sidebar-nav">
-                <a href="{{ url_for('index') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'index' %}active{% endif %}">
+                <a href="/" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                     <span>Dashboard</span>
                 </a>
-                <a href="{{ url_for('predict') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'predict' %}active{% endif %}">
+                <a href="/predict" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg active">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     <span>Prediction</span>
-                </a>
-                <a href="{{ url_for('insights') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'insights' %}active{% endif %}">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-                    <span>Insights</span>
                 </a>
             </nav>
         </aside>
@@ -130,58 +126,58 @@
 
                 <!-- Content Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Input Form Column -->
                     <div class="lg:col-span-1">
-                        <div class="glass-effect p-8">
-                            <h2 class="text-xl font-semibold text-gray-800 mb-6">Customer Details</h2>
-                            <form action="/predict" method="POST">
-                                <div class="space-y-5">
-                                    <div>
-                                        <label for="tenure" class="block text-sm font-medium text-gray-700 mb-2">Days of Tenure</label>
-                                        <input type="number" id="tenure" name="tenure" class="w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" value="500" required>
-                                    </div>
-                                    <div>
-                                        <label for="annual_premium" class="block text-sm font-medium text-gray-700 mb-2">Current Annual Premium ($)</label>
-                                        <input type="number" step="0.01" id="annual_premium" name="annual_premium" class="w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" value="1200.50" required>
-                                    </div>
-                                    <div>
-                                        <label for="income" class="block text-sm font-medium text-gray-700 mb-2">Annual Income ($)</label>
-                                        <input type="number" id="income" name="income" class="w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" value="65000" required>
-                                    </div>
-                                    <div>
-                                        <label for="age" class="block text-sm font-medium text-gray-700 mb-2">Age in Years</label>
-                                        <input type="number" id="age" name="age" class="w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" value="45" required>
-                                    </div>
-                                    <div>
-                                        <label for="marital_status" class="block text-sm font-medium text-gray-700 mb-2">Marital Status</label>
-                                        <select id="marital_status" name="marital_status" class="w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
-                                            <option value="Married">Married</option>
-                                            <option value="Single">Single</option>
-                                            <option value="Unknown">Unknown</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="home_owner" class="block text-sm font-medium text-gray-700 mb-2">Home Ownership</label>
-                                        <select id="home_owner" name="home_owner" class="w-full px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
-                                            <option value="0">Renter</option>
-                                            <option value="1">Owner</option>
-                                        </select>
-                                    </div>
-                                    <div class="flex items-center pt-2">
-                                        <input type="checkbox" id="good_credit" name="good_credit" class="h-4 w-4 rounded" checked>
-                                        <label for="good_credit" class="ml-3 block text-sm font-medium text-gray-700">Has Good Credit?</label>
-                                    </div>
-                                    <div class="flex items-center pt-2">
-                                        <input type="checkbox" id="has_children" name="has_children" class="h-4 w-4 rounded">
-                                        <label for="has_children" class="ml-3 block text-sm font-medium text-gray-700">Has Children?</label>
-                                    </div>
-                                </div>
-                                <button type="submit" class="mt-8 w-full py-3 px-4 rounded-lg hover:shadow-lg transition-all">
-                                    Predict Churn Risk
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+    <div class="glass-effect p-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Customer Details</h2>
+        <form action="/predict" method="POST">
+            <div class="space-y-5">
+                <div>
+                    <label for="tenure" class="block text-sm font-medium text-gray-700 mb-2">Days of Tenure</label>
+                    <input type="number" id="tenure" name="tenure" class="w-full px-4 py-2 rounded-lg shadow-sm" value="{{ form_data.tenure }}" required>
+                </div>
+                <div>
+                    <label for="annual_premium" class="block text-sm font-medium text-gray-700 mb-2">Current Annual Premium ($)</label>
+                    <input type="number" step="0.01" id="annual_premium" name="annual_premium" class="w-full px-4 py-2 rounded-lg shadow-sm" value="{{ form_data.annual_premium }}" required>
+                </div>
+                <div>
+                    <label for="income" class="block text-sm font-medium text-gray-700 mb-2">Annual Income ($)</label>
+                    <input type="number" id="income" name="income" class="w-full px-4 py-2 rounded-lg shadow-sm" value="{{ form_data.income }}" required>
+                </div>
+                <div>
+                    <label for="age" class="block text-sm font-medium text-gray-700 mb-2">Age in Years</label>
+                    <input type="number" id="age" name="age" class="w-full px-4 py-2 rounded-lg shadow-sm" value="{{ form_data.age }}" required>
+                </div>
+                <div>
+                    <label for="marital_status" class="block text-sm font-medium text-gray-700 mb-2">Marital Status</label>
+                    <select id="marital_status" name="marital_status" class="w-full px-4 py-2 rounded-lg shadow-sm" required>
+                        <option value="Married" {% if form_data.marital_status == 'Married' %}selected{% endif %}>Married</option>
+                        <option value="Single" {% if form_data.marital_status == 'Single' %}selected{% endif %}>Single</option>
+                        <option value="Unknown" {% if form_data.marital_status == 'Unknown' %}selected{% endif %}>Unknown</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="home_owner" class="block text-sm font-medium text-gray-700 mb-2">Home Ownership</label>
+                    <select id="home_owner" name="home_owner" class="w-full px-4 py-2 rounded-lg shadow-sm" required>
+                        <option value="0" {% if form_data.home_owner == '0' %}selected{% endif %}>Renter</option>
+                        <option value="1" {% if form_data.home_owner == '1' %}selected{% endif %}>Owner</option>
+                    </select>
+                </div>
+                <div class="flex items-center pt-2">
+                    <input type="checkbox" id="good_credit" name="good_credit" class="h-4 w-4 rounded" {% if form_data.good_credit %}checked{% endif %}>
+                    <label for="good_credit" class="ml-3 block text-sm font-medium text-gray-700">Has Good Credit?</label>
+                </div>
+                <div class="flex items-center pt-2">
+                    <input type="checkbox" id="has_children" name="has_children" class="h-4 w-4 rounded" {% if form_data.has_children %}checked{% endif %}>
+                    <label for="has_children" class="ml-3 block text-sm font-medium text-gray-700">Has Children?</label>
+                </div>
+            </div>
+            <button type="submit" class="mt-8 w-full py-3 px-4 rounded-lg hover:shadow-lg transition-all">
+                Predict Churn Risk
+            </button>
+        </form>
+    </div>
+</div>
+
 
                     <!-- Results Column -->
                     <div class="lg:col-span-2">
