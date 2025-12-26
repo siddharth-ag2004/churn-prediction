@@ -1,4 +1,5 @@
 import pandas as pd
+from dotenv import load_dotenv
 from flask import Flask, render_template, jsonify, request
 import json
 import numpy as np
@@ -13,6 +14,20 @@ from email_draft import generate_retention_email
 
 import joblib
 import shap
+from groq import Groq
+from flask import session
+import os
+import re
+from agent_backend import chat_with_agent, MOCK_CUSTOMER_DATA, DISCOUNT_LOGS
+
+# --- Agent Configuration ---
+# Configure Groq API
+load_dotenv() # Ensure env vars are loaded
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+
+# --- Global State for Demo ---
+# Moved to agent_backend.py
+
 
 # --- Add this section to load the model and explainers once when the app starts ---
 # This is much more efficient than loading them on every request.
@@ -27,6 +42,7 @@ except FileNotFoundError:
 
 # Initialize the Flask application
 app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'super_secret_key_for_demo_session') # Load from env, fallback for dev
 
 # --- Mock News Events for the Insights Page ---
 # In a real application, this would come from a database or an external API
@@ -104,13 +120,52 @@ def generate_churn_heatmap(df, sample_size=5000):
  
     return m._repr_html_()
 
+def calculate_optimal_discount(customer_data, model, feature_names):
+    """
+    Calculates the optimal discount to reduce churn probability below 0.5.
+    Returns: (suggested_discount, discount_analysis_list)
+    """
+    suggested_discount = None
+    discount_analysis = []
+    original_premium = customer_data['curr_ann_amt']
+    
+    # Try discounts from 1% to 15%
+    for discount_pct in range(1, 16, 1):
+        sim_customer_data = customer_data.copy()
+        sim_customer_data['curr_ann_amt'] = original_premium * (1 - (discount_pct / 100.0))
+        x_sim_df = pd.DataFrame([sim_customer_data], columns=feature_names)
+        sim_probability = float(model.predict_proba(x_sim_df)[0][1])
+        
+        discount_analysis.append({
+            'discount_pct': discount_pct,
+            'new_premium': round(sim_customer_data['curr_ann_amt'], 2),
+            'new_probability': sim_probability
+        })
+        
+        if sim_probability < 0.5 and suggested_discount is None:
+            suggested_discount = discount_pct
+            # We don't break here because we want the full analysis for the chart
+            
+    if suggested_discount is None:
+        suggested_discount = 20
+        
+    return suggested_discount, discount_analysis
+
 # Load the data once when the app starts
 df = load_and_prepare_data()
 
 # ==============================================================================
 # --- DASHBOARD PAGE ---
 # ==============================================================================
+# ==============================================================================
+# --- DASHBOARD PAGE ---
+# ==============================================================================
 @app.route('/')
+def landing():
+    """Renders the role selection landing page."""
+    return render_template('landing.html')
+
+@app.route('/dashboard')
 def index():
     """
     Renders the main dashboard page.
@@ -240,24 +295,8 @@ def predict():
 
             # ... (discount analysis logic is unchanged) ...
             discount_analysis = []
-            suggested_discount = None
-            # if probability >= 0.5:
-            original_premium = customer_data['curr_ann_amt']
-            for discount_pct in range(1, 16, 1):
-                sim_customer_data = customer_data.copy()
-                sim_customer_data['curr_ann_amt'] = original_premium * (1 - (discount_pct / 100.0))
-                x_sim_df = pd.DataFrame([sim_customer_data], columns=feature_names)
-                sim_probability = float(model.predict_proba(x_sim_df)[0][1])
-                discount_analysis.append({
-                    'discount_pct': discount_pct,
-                    'new_premium': round(sim_customer_data['curr_ann_amt'], 2),
-                    'new_probability': sim_probability
-                })
-                if sim_probability < 0.5 and suggested_discount is None:
-                    suggested_discount = discount_pct
-                    break
-            if suggested_discount is None:
-                suggested_discount = 20
+            # Calculate optimal discount
+            suggested_discount, discount_analysis = calculate_optimal_discount(customer_data, model, feature_names)
 
             # Package all data for the template
             prediction_data = {
@@ -376,6 +415,80 @@ def generate_email_draft():
     
     # Redirect to mail client
     return redirect(mailto_link)
+
+# ==============================================================================
+# --- AGENT CHAT ROUTES ---
+# ==============================================================================
+
+# ==============================================================================
+# --- AGENT CHAT ROUTES ---
+# ==============================================================================
+
+@app.route('/customer')
+def customer_portal():
+    """Renders the customer portal with chat interface."""
+    # Clear history on new page load
+    session['chat_history'] = []
+    session['discount_applied'] = False # Reset discount flag
+    
+    # Mock customer data for the demo (Alex Johnson)
+    # Use global data so updates persist
+    customer_data = MOCK_CUSTOMER_DATA
+    
+    # Calculate optimal discount for this customer
+    feature_names = [
+        'curr_ann_amt', 'days_tenure', 'age_in_years', 'income',
+        'has_children', 'marital_status', 'home_owner', 'good_credit'
+    ]
+    
+    try:
+        if all([model, explainer]):
+             suggested_discount, _ = calculate_optimal_discount(customer_data, model, feature_names)
+             session['target_discount'] = suggested_discount
+             print(f"DEBUG: Calculated target discount for customer: {suggested_discount}%")
+        else:
+             session['target_discount'] = 15 # Fallback
+             print("DEBUG: Model not loaded, using fallback discount 15%")
+    except Exception as e:
+        print(f"Error calculating discount for customer portal: {e}")
+        session['target_discount'] = 15 # Fallback
+
+    return render_template('customer_portal.html')
+
+@app.route('/admin/discounts')
+def discount_logs():
+    """Renders the stakeholder discount logs."""
+    return render_template('discount_logs.html', logs=DISCOUNT_LOGS)
+
+@app.route('/api/chat', methods=['POST'])
+def chat_endpoint():
+    data = request.get_json()
+    user_message = data.get('message')
+    
+    if not user_message:
+        return jsonify({'error': 'No message provided'}), 400
+
+    # Retrieve history from session
+    history = session.get('chat_history', [])
+    
+    try:
+        # Call the backend agent logic
+        agent_text, new_premium = chat_with_agent(user_message, history, session)
+        
+        # Update session history
+        history.append({'role': 'user', 'text': user_message})
+        history.append({'role': 'model', 'text': agent_text})
+        session['chat_history'] = history
+        
+        response_data = {'response': agent_text}
+        if new_premium:
+            response_data['new_premium'] = new_premium
+            
+        return jsonify(response_data)
+
+    except Exception as e:
+        print(f"Agent Error: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

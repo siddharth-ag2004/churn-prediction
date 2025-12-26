@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retainly - Select Role</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 h-screen flex items-center justify-center">
+
+    <div class="max-w-4xl w-full px-6">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Welcome to Retainly</h1>
+            <p class="text-xl text-gray-600">Please select your role to continue</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Stakeholder Card -->
+            <a href="{{ url_for('index') }}"
+                class="group bg-white p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl hover:border-indigo-500 transition-all duration-300 transform hover:-translate-y-1">
+                <div
+                    class="h-16 w-16 bg-indigo-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-indigo-600 transition-colors">
+                    <svg class="w-8 h-8 text-indigo-600 group-hover:text-white" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-3">Stakeholder</h2>
+                <p class="text-gray-600">Access the analytics dashboard, view churn predictions, and monitor agent
+                    performance logs.</p>
+                <div
+                    class="mt-6 flex items-center text-indigo-600 font-semibold group-hover:translate-x-2 transition-transform">
+                    Enter Dashboard <span class="ml-2">→</span>
+                </div>
+            </a>
+
+            <!-- Customer Card -->
+            <a href="{{ url_for('customer_portal') }}"
+                class="group bg-white p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl hover:border-pink-500 transition-all duration-300 transform hover:-translate-y-1">
+                <div
+                    class="h-16 w-16 bg-pink-100 rounded-xl flex items-center justify-center mb-6 group-hover:bg-pink-600 transition-colors">
+                    <svg class="w-8 h-8 text-pink-600 group-hover:text-white" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-3">Customer</h2>
+                <p class="text-gray-600">View your policy details, check your status, and chat with our retention
+                    specialist.</p>
+                <div
+                    class="mt-6 flex items-center text-pink-600 font-semibold group-hover:translate-x-2 transition-transform">
+                    Go to Portal <span class="ml-2">→</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</body>
+
+</html>

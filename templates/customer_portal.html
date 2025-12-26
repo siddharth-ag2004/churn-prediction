@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Policy - Retainly</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        /* Chat styles adapted for embedding */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: #ec4899;
+            /* Pink-500 */
+            color: white;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .message.agent {
+            align-self: flex-start;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .typing-indicator {
+            align-self: flex-start;
+            background-color: #f3f4f6;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            display: none;
+            gap: 0.25rem;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background-color: #9ca3af;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body class="p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div class="flex items-center gap-3">
+                <div
+                    class="h-10 w-10 bg-pink-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    R</div>
+                <h1 class="text-2xl font-bold text-gray-900">Retainly Customer Portal</h1>
+            </div>
+            <a href="/" class="text-gray-500 hover:text-gray-900 font-medium">Exit</a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Policy Details -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- User Profile Card -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-2xl">👤
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">Alex Johnson</h2>
+                            <p class="text-sm text-gray-500">Policy ID: #POL-883920</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between py-2 border-b border-gray-50">
+                            <span class="text-gray-500">Status</span>
+                            <span
+                                class="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">Active</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-50">
+                            <span class="text-gray-500">Plan Type</span>
+                            <span class="font-medium text-gray-900">Comprehensive Auto</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-50">
+                            <span class="text-gray-500">Tenure</span>
+                            <span class="font-medium text-gray-900">5 Years</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-gray-50">
+                            <span class="text-gray-500">Next Renewal</span>
+                            <span class="font-medium text-gray-900">Oct 12, 2025</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Premium Card -->
+                <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl shadow-lg p-6 text-white">
+                    <p class="text-indigo-100 text-sm font-medium mb-1">Current Annual Premium</p>
+                    <h3 id="current-premium" class="text-3xl font-bold mb-4">$1,200.00</h3>
+                    <button
+                        class="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors border border-white/20">
+                        View Payment History
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column: Chat Interface -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col"
+                    style="height: 600px;">
+                    <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                        <h3 class="font-semibold text-gray-900">Support Assistant</h3>
+                        <span class="text-xs text-gray-500">Online</span>
+                    </div>
+
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message agent">
+                            Hello Alex! I noticed you were viewing your cancellation options. Is there anything I can
+                            help you with regarding your policy today?
+                        </div>
+                    </div>
+
+                    <div class="typing-indicator" id="typing-indicator">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+
+                    <div class="p-4 border-t border-gray-100 bg-white">
+                        <div class="flex gap-2">
+                            <input type="text" id="user-input" placeholder="Type your message..."
+                                class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all">
+                            <button id="send-btn"
+                                class="px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-xl transition-colors flex items-center gap-2">
+                                <span>Send</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', sender);
+            msgDiv.textContent = text;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            appendMessage(text, 'user');
+            userInput.value = '';
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+
+            typingIndicator.style.display = 'flex';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                const data = await response.json();
+                typingIndicator.style.display = 'none';
+
+                if (data.error) {
+                    appendMessage("Error: " + data.error, 'agent');
+                } else {
+                    appendMessage(data.response, 'agent');
+
+                    // Update premium if returned
+                    if (data.new_premium) {
+                        const premiumEl = document.getElementById('current-premium');
+                        // Animate change
+                        premiumEl.style.transition = "all 0.5s ease";
+                        premiumEl.style.color = "#4ade80"; // Green-400
+                        premiumEl.style.transform = "scale(1.1)";
+
+                        setTimeout(() => {
+                            premiumEl.textContent = "$" + data.new_premium.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            setTimeout(() => {
+                                premiumEl.style.color = "";
+                                premiumEl.style.transform = "";
+                            }, 500);
+                        }, 200);
+                    }
+                }
+
+            } catch (error) {
+                typingIndicator.style.display = 'none';
+                appendMessage("Sorry, something went wrong.", 'agent');
+            } finally {
+                userInput.disabled = false;
+                sendBtn.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    </script>
+
+</body>
+
+</html>

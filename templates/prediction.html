@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -90,31 +91,54 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="flex h-screen">
         <!-- Static Sidebar with Glass Effect -->
-        <aside class="w-64 glass-effect flex-shrink-0 !rounded-none !border-r !border-l-0 !border-t-0 !border-b-0 overflow-y-auto">
+        <aside
+            class="w-64 glass-effect flex-shrink-0 !rounded-none !border-r !border-l-0 !border-t-0 !border-b-0 overflow-y-auto">
             <div class="p-6">
                 <div class="flex items-center gap-3">
                     <svg class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     <span class="text-2xl font-bold text-gray-800">Retainly</span>
                 </div>
             </div>
             <nav class="mt-8 px-4 sidebar-nav">
-                <a href="{{ url_for('index') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'index' %}active{% endif %}">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                <a href="{{ url_for('index') }}"
+                    class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'index' %}active{% endif %}">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
                     <span>Dashboard</span>
                 </a>
-                <a href="{{ url_for('predict') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'predict' %}active{% endif %}">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <a href="{{ url_for('predict') }}"
+                    class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'predict' %}active{% endif %}">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
                     <span>Prediction</span>
                 </a>
-                <a href="{{ url_for('insights') }}" class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'insights' %}active{% endif %}">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <a href="{{ url_for('insights') }}"
+                    class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'insights' %}active{% endif %}">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
                     <span>Insights</span>
+                </a>
+                <a href="{{ url_for('discount_logs') }}"
+                    class="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg {% if request.endpoint == 'discount_logs' %}active{% endif %}">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    <span>Discount Logs</span>
                 </a>
             </nav>
         </aside>
@@ -125,71 +149,100 @@
                 <!-- Header -->
                 <header class="mb-8">
                     <h1 class="text-4xl font-bold text-gray-800">Individual Churn Prediction</h1>
-                    <p class="text-gray-600 mt-2">Enter a customer's details to get their churn risk and prediction explanation.</p>
+                    <p class="text-gray-600 mt-2">Enter a customer's details to get their churn risk and prediction
+                        explanation.</p>
                 </header>
 
                 <!-- Content Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-1">
-    <div class="glass-effect p-8">
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">Customer Details</h2>
-        <form action="/predict" method="POST">
-            <div class="space-y-5">
-                <div>
-                    <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-2">Customer Name(s)</label>
-                    <input type="text" id="customer_name" name="customer_name" 
-                           class="w-full px-4 py-2 rounded-lg shadow-sm" 
-                           placeholder="John Doe" 
-                           value="{{ form_data.customer_name if form_data.customer_name else 'John Doe' }}" 
-                           required>
-                    <p class="text-xs text-gray-500 mt-1">Separate multiple names with commas.</p>
-                </div>                                        
-                <div>
-                    <label for="tenure" class="block text-sm font-medium text-gray-700 mb-2">Days of Tenure</label>
-                    <input type="number" id="tenure" name="tenure" class="w-full px-4 py-2 rounded-lg shadow-sm" value="{{ form_data.tenure }}" required>
-                </div>
-                <div>
-                    <label for="annual_premium" class="block text-sm font-medium text-gray-700 mb-2">Current Annual Premium ($)</label>
-                    <input type="number" step="0.01" id="annual_premium" name="annual_premium" class="w-full px-4 py-2 rounded-lg shadow-sm" value="{{ form_data.annual_premium }}" required>
-                </div>
-                <div>
-                    <label for="income" class="block text-sm font-medium text-gray-700 mb-2">Annual Income ($)</label>
-                    <input type="number" id="income" name="income" class="w-full px-4 py-2 rounded-lg shadow-sm" value="{{ form_data.income }}" required>
-                </div>
-                <div>
-                    <label for="age" class="block text-sm font-medium text-gray-700 mb-2">Age in Years</label>
-                    <input type="number" id="age" name="age" class="w-full px-4 py-2 rounded-lg shadow-sm" value="{{ form_data.age }}" required>
-                </div>
-                <div>
-                    <label for="marital_status" class="block text-sm font-medium text-gray-700 mb-2">Marital Status</label>
-                    <select id="marital_status" name="marital_status" class="w-full px-4 py-2 rounded-lg shadow-sm" required>
-                        <option value="Married" {% if form_data.marital_status == 'Married' %}selected{% endif %}>Married</option>
-                        <option value="Single" {% if form_data.marital_status == 'Single' %}selected{% endif %}>Single</option>
-                        <!-- <option value="Unknown" {% if form_data.marital_status == 'Unknown' %}selected{% endif %}>Unknown</option> -->
-                    </select>
-                </div>
-                <div>
-                    <label for="home_owner" class="block text-sm font-medium text-gray-700 mb-2">Home Ownership</label>
-                    <select id="home_owner" name="home_owner" class="w-full px-4 py-2 rounded-lg shadow-sm" required>
-                        <option value="0" {% if form_data.home_owner == '0' %}selected{% endif %}>Renter</option>
-                        <option value="1" {% if form_data.home_owner == '1' %}selected{% endif %}>Owner</option>
-                    </select>
-                </div>
-                <div class="flex items-center pt-2">
-                    <input type="checkbox" id="good_credit" name="good_credit" class="h-4 w-4 rounded" {% if form_data.good_credit %}checked{% endif %}>
-                    <label for="good_credit" class="ml-3 block text-sm font-medium text-gray-700">Has Good Credit?</label>
-                </div>
-                <div class="flex items-center pt-2">
-                    <input type="checkbox" id="has_children" name="has_children" class="h-4 w-4 rounded" {% if form_data.has_children %}checked{% endif %}>
-                    <label for="has_children" class="ml-3 block text-sm font-medium text-gray-700">Has Children?</label>
-                </div>
-            </div>
-            <button type="submit" class="mt-8 w-full py-3 px-4 rounded-lg hover:shadow-lg transition-all">
-                Predict Churn Risk
-            </button>
-        </form>
-    </div>
-</div>
+                        <div class="glass-effect p-8">
+                            <h2 class="text-xl font-semibold text-gray-800 mb-6">Customer Details</h2>
+                            <form action="/predict" method="POST">
+                                <div class="space-y-5">
+                                    <div>
+                                        <label for="customer_name"
+                                            class="block text-sm font-medium text-gray-700 mb-2">Customer
+                                            Name(s)</label>
+                                        <input type="text" id="customer_name" name="customer_name"
+                                            class="w-full px-4 py-2 rounded-lg shadow-sm" placeholder="John Doe"
+                                            value="{{ form_data.customer_name if form_data.customer_name else 'John Doe' }}"
+                                            required>
+                                        <p class="text-xs text-gray-500 mt-1">Separate multiple names with commas.</p>
+                                    </div>
+                                    <div>
+                                        <label for="tenure" class="block text-sm font-medium text-gray-700 mb-2">Days of
+                                            Tenure</label>
+                                        <input type="number" id="tenure" name="tenure"
+                                            class="w-full px-4 py-2 rounded-lg shadow-sm" value="{{ form_data.tenure }}"
+                                            required>
+                                    </div>
+                                    <div>
+                                        <label for="annual_premium"
+                                            class="block text-sm font-medium text-gray-700 mb-2">Current Annual Premium
+                                            ($)</label>
+                                        <input type="number" step="0.01" id="annual_premium" name="annual_premium"
+                                            class="w-full px-4 py-2 rounded-lg shadow-sm"
+                                            value="{{ form_data.annual_premium }}" required>
+                                    </div>
+                                    <div>
+                                        <label for="income" class="block text-sm font-medium text-gray-700 mb-2">Annual
+                                            Income ($)</label>
+                                        <input type="number" id="income" name="income"
+                                            class="w-full px-4 py-2 rounded-lg shadow-sm" value="{{ form_data.income }}"
+                                            required>
+                                    </div>
+                                    <div>
+                                        <label for="age" class="block text-sm font-medium text-gray-700 mb-2">Age in
+                                            Years</label>
+                                        <input type="number" id="age" name="age"
+                                            class="w-full px-4 py-2 rounded-lg shadow-sm" value="{{ form_data.age }}"
+                                            required>
+                                    </div>
+                                    <div>
+                                        <label for="marital_status"
+                                            class="block text-sm font-medium text-gray-700 mb-2">Marital Status</label>
+                                        <select id="marital_status" name="marital_status"
+                                            class="w-full px-4 py-2 rounded-lg shadow-sm" required>
+                                            <option value="Married" {% if form_data.marital_status=='Married'
+                                                %}selected{% endif %}>Married</option>
+                                            <option value="Single" {% if form_data.marital_status=='Single' %}selected{%
+                                                endif %}>Single</option>
+                                            <!-- <option value="Unknown" {% if form_data.marital_status == 'Unknown' %}selected{% endif %}>Unknown</option> -->
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="home_owner"
+                                            class="block text-sm font-medium text-gray-700 mb-2">Home Ownership</label>
+                                        <select id="home_owner" name="home_owner"
+                                            class="w-full px-4 py-2 rounded-lg shadow-sm" required>
+                                            <option value="0" {% if form_data.home_owner=='0' %}selected{% endif %}>
+                                                Renter</option>
+                                            <option value="1" {% if form_data.home_owner=='1' %}selected{% endif %}>
+                                                Owner</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center pt-2">
+                                        <input type="checkbox" id="good_credit" name="good_credit"
+                                            class="h-4 w-4 rounded" {% if form_data.good_credit %}checked{% endif %}>
+                                        <label for="good_credit"
+                                            class="ml-3 block text-sm font-medium text-gray-700">Has Good
+                                            Credit?</label>
+                                    </div>
+                                    <div class="flex items-center pt-2">
+                                        <input type="checkbox" id="has_children" name="has_children"
+                                            class="h-4 w-4 rounded" {% if form_data.has_children %}checked{% endif %}>
+                                        <label for="has_children"
+                                            class="ml-3 block text-sm font-medium text-gray-700">Has Children?</label>
+                                    </div>
+                                </div>
+                                <button type="submit"
+                                    class="mt-8 w-full py-3 px-4 rounded-lg hover:shadow-lg transition-all">
+                                    Predict Churn Risk
+                                </button>
+                            </form>
+                        </div>
+                    </div>
 
                     <!-- Results Column -->
                     <div class="lg:col-span-2">
@@ -197,7 +250,8 @@
                         <div class="grid grid-cols-1 gap-8">
                             <!-- Churn Score Gauge -->
                             <div class="glass-effect p-8">
-                                <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">Churn Probability Score</h2>
+                                <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">Churn Probability Score
+                                </h2>
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="relative" style="width: 350px; height: 250px;">
                                         <canvas id="churnGauge"></canvas>
@@ -211,7 +265,8 @@
 
                             <!-- SHAP Waterfall Explanation -->
                             <div class="glass-effect p-8">
-                                <h2 class="text-xl font-semibold text-gray-800 mb-6">Prediction Factors (SHAP Explanation)</h2>
+                                <h2 class="text-xl font-semibold text-gray-800 mb-6">Prediction Factors (SHAP
+                                    Explanation)</h2>
                                 <div style="height: 450px;">
                                     <canvas id="shapWaterfall"></canvas>
                                 </div>
@@ -229,30 +284,36 @@
                             <div class="glass-effect p-6">
                                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Premium Comparison</h2>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <div class="bg-red-50 bg-opacity-70 p-4 rounded-lg text-center border border-red-200">
+                                    <div
+                                        class="bg-red-50 bg-opacity-70 p-4 rounded-lg text-center border border-red-200">
                                         <p class="text-sm text-red-600 mb-2">Current Premium</p>
                                         <p class="text-2xl font-bold text-red-800" id="currentPremiumDisplay">$0</p>
                                     </div>
-                                    <div class="bg-green-50 bg-opacity-70 p-4 rounded-lg text-center border border-green-200">
+                                    <div
+                                        class="bg-green-50 bg-opacity-70 p-4 rounded-lg text-center border border-green-200">
                                         <p class="text-sm text-green-700 font-medium mb-2">Discounted Premium</p>
-                                        <p class="text-2xl font-bold text-green-600" id="discountedPremiumDisplay">$0</p>
+                                        <p class="text-2xl font-bold text-green-600" id="discountedPremiumDisplay">$0
+                                        </p>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="mt-4 flex justify-center">
-                                <button id="draftEmailBtn" class="py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition">
+                                <button id="draftEmailBtn"
+                                    class="py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition">
                                     Draft Email
                                 </button>
                             </div>
-                                                 
+
 
                         </div>
                         {% else %}
                         <div class="glass-effect p-8 flex items-center justify-center h-full">
                             <div class="text-center">
-                                <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
+                                <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
                                 </svg>
                                 <h3 class="text-lg font-semibold text-gray-800">No Prediction Yet</h3>
                                 <p class="mt-2 text-sm text-gray-600">
@@ -298,7 +359,7 @@
 
         // SPEEDOMETER GAUGE CHART
         const ctx = document.getElementById('churnGauge').getContext('2d');
-        
+
         // Create gradient for the gauge background
         const gaugeGradient = ctx.createLinearGradient(0, 0, 350, 0);
         gaugeGradient.addColorStop(0, 'rgba(16, 185, 129, 0.8)');
@@ -342,23 +403,23 @@
 
         // SHAP WATERFALL CHART
         const shapCtx = document.getElementById('shapWaterfall').getContext('2d');
-        
+
         // Prepare data for waterfall chart
         const features = explanation_data.explanation.map(item => item.feature);
         const values = explanation_data.explanation.map(item => item.value);
         const baseValue = explanation_data.base_value;
-        
+
         // Create cumulative values for waterfall effect
         let cumulative = baseValue;
         const cumulativeValues = [baseValue];
-        
+
         for (let i = 0; i < values.length; i++) {
             cumulative += values[i];
             cumulativeValues.push(cumulative);
         }
 
         // Colors for positive and negative contributions
-        const barColors = values.map(val => 
+        const barColors = values.map(val =>
             val > 0 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(16, 185, 129, 0.7)'
         );
 
@@ -392,7 +453,7 @@
                         padding: 12,
                         displayColors: false,
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 const value = context.parsed.x;
                                 return `Impact: ${value > 0 ? '+' : ''}${value.toFixed(4)}`;
                             }
@@ -428,7 +489,7 @@
         // DISCOUNT ANALYSIS CHART
         const discountData = {{ prediction_data.discount_analysis | tojson }};
         const discountCtx = document.getElementById('discountChart').getContext('2d');
-        
+
         // Get current premium from form input
         const currentPremium = parseFloat(document.getElementById('annual_premium').value);
         const discount_to_provide = {{ prediction_data.suggested_discount | tojson }};
@@ -440,7 +501,7 @@
         const discountLabels = ['Current', ...discountData.map(d => `${d.discount_pct}% Off`)];
         const discountProbabilities = [probability * 100, ...discountData.map(d => d.new_probability * 100)];
         const discountPremiums = [currentPremium, ...discountData.map(d => d.new_premium)];
-        
+
         const discountChart = new Chart(discountCtx, {
             type: 'line',
             data: {
@@ -507,7 +568,7 @@
                         padding: 12,
                         displayColors: true,
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 let label = context.dataset.label || '';
                                 if (label) {
                                     label += ': ';
@@ -553,7 +614,7 @@
                             color: 'rgba(255, 255, 255, 0.1)'
                         },
                         ticks: {
-                            callback: function(value) {
+                            callback: function (value) {
                                 return value.toFixed(0) + '%';
                             },
                             font: {
@@ -578,7 +639,7 @@
                             drawOnChartArea: false,
                         },
                         ticks: {
-                            callback: function(value) {
+                            callback: function (value) {
                                 return '$' + value.toFixed(0);
                             },
                             font: {
@@ -606,26 +667,28 @@
                 });
 
             // Use the predicted discount from your JS variable
-            const discount = {{ prediction_data.suggested_discount | tojson }};
+            const discount = {{ prediction_data.suggested_discount | tojson
+        }};
 
-            // Open mail client for each email (one by one via comma-separated in mailto)
-            const mailto = `mailto:${emails.join(',')}`
-                        + `?subject=${encodeURIComponent("Exclusive Offer Just for You")}`
-                        + `&body=${encodeURIComponent(
-                            `Dear Customer,\n\nWe greatly value you as a customer at Chubb Insurance and want to ensure you continue to enjoy the best coverage possible.\n\nAs a token of our appreciation, we’re excited to offer you an exclusive ${discount}% discount on your policy.\n\nIf you’d like to take advantage of this offer or discuss your policy options, please reach out to our customer service team at support@chubb.com or call us at 1-800-CHUBB-CARE.\n\nThank you for being a valued part of the Chubb family.\n\nWarm regards,\nThe Chubb Customer Experience Team\nChubb Insurance\nhttps://www.chubb.com`
-                        )}`;
+        // Open mail client for each email (one by one via comma-separated in mailto)
+        const mailto = `mailto:${emails.join(',')}`
+            + `?subject=${encodeURIComponent("Exclusive Offer Just for You")}`
+            + `&body=${encodeURIComponent(
+                `Dear Customer,\n\nWe greatly value you as a customer at Chubb Insurance and want to ensure you continue to enjoy the best coverage possible.\n\nAs a token of our appreciation, we’re excited to offer you an exclusive ${discount}% discount on your policy.\n\nIf you’d like to take advantage of this offer or discuss your policy options, please reach out to our customer service team at support@chubb.com or call us at 1-800-CHUBB-CARE.\n\nThank you for being a valued part of the Chubb family.\n\nWarm regards,\nThe Chubb Customer Experience Team\nChubb Insurance\nhttps://www.chubb.com`
+            )}`;
 
-            // Redirect to open mail client
-            window.location.href = mailto;
+        // Redirect to open mail client
+        window.location.href = mailto;
         });
 
 
 
 
-        
+
     </script>
     {% endif %}
 
 
 </body>
+
 </html>

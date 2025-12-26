@@ -68,7 +68,12 @@ python app.py
 
 - Comprehensive Dashboard: Presents a high-level overview of churn analytics, including breakdowns by tenure, premium, income, and demographics, as well as a geospatial heatmap of churn hotspots.
 
-- External Event Correlation: An "Insights" page connects real-world news events (fetched via a news API and analyzed by Gemini) to spikes in the historical churn rate, providing context for market-wide trends. 
+- External Event Correlation: An "Insights" page connects real-world news events (fetched via a news API and analyzed by Gemini) to spikes in the historical churn rate, providing context for market-wide trends.
+
+- **AI Negotiation Agent (New)**: A fully autonomous, voice-and-text capable negotiation agent powered by **Llama 3.1 (via Groq)**.
+    - **Personalized Strategy**: Dynamically calculates a target discount based on the customer's churn risk and lifetime value.
+    - **Autonomous Tool Use**: The agent can autonomously execute a "tool call" to apply a discount to the customer's policy in real-time.
+    - **Robust Negotiation Logic**: Adheres to strict business rules (e.g., never offer more than the target, require explicit confirmation, single-use discounts).
 
 ## Video Link:
 https://drive.google.com/file/d/1EyoNU0Z9q8Gltf6HUcFt5sdvV8bmM2TI/view?usp=sharing
