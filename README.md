@@ -44,8 +44,9 @@ pip install -r requirements.txt
 
 ### 4. Set Up Environment Variables 
 
-**GEMINI_API_KEY**="YOUR_GEMINI_API_KEY"
+**GEMINI_API_KEY**="YOUR_GEMINI_API_KEY" <br>
 **MEDIASTACK_API_KEY**="YOUR_MEDIASTACK_API_KEY" <br>
+**GROQ_API_KEY**="YOUR_GROQ_API_KEY" <br>
 in **.env** file
 
 ### 5. Run the Application
