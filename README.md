@@ -70,13 +70,15 @@ python app.py
 
 - External Event Correlation: An "Insights" page connects real-world news events (fetched via a news API and analyzed by Gemini) to spikes in the historical churn rate, providing context for market-wide trends.
 
-- **AI Negotiation Agent (New)**: A fully autonomous, voice-and-text capable negotiation agent powered by **Llama 3.1 (via Groq)**.
-    - **Personalized Strategy**: Dynamically calculates a target discount based on the customer's churn risk and lifetime value.
+- **AI Negotiation Agent (New)**: A fully autonomous, text-based negotiation AI agent.
     - **Autonomous Tool Use**: The agent can autonomously execute a "tool call" to apply a discount to the customer's policy in real-time.
     - **Robust Negotiation Logic**: Adheres to strict business rules (e.g., never offer more than the target, require explicit confirmation, single-use discounts).
 
 ## Video Link:
 https://drive.google.com/file/d/1EyoNU0Z9q8Gltf6HUcFt5sdvV8bmM2TI/view?usp=sharing
+
+Agentic AI demo:
+https://drive.google.com/file/d/1rjUnluVjEeMSqGZZ5ayj2Jmygsu-91Sd/view?usp=sharing
 
 ## Dataset Link:
 https://drive.google.com/drive/folders/1tuefd734bJxHMcDXZneeJClwciLiFh9f?usp=sharing
